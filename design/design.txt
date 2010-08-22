@@ -6,7 +6,13 @@ pixel perfect movement outside of battles
 looks like pixel perfect movement inside of battles - no solid edges of things
     (groups of enemies are not perfectly lined up)
 make battle scenes a real scene (no boring random battles, every battle like a boss)
+skill based
+    choose your training in the "boot camp" level
 
+3 "classes"
+    infiltrator - spy, stealthy
+    disruptor - explosives, cheap tricks
+    mutilator - infiltry, guns and knives
 
 
 
