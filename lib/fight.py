@@ -19,6 +19,7 @@ class spot(thing):
                 
 class realchar(thing):
     def __init__(self):
+        self.pos = [0,0]
         self.spot = None
         self.weapon = None
         self.sprite = char("army",[100,100])
@@ -30,8 +31,16 @@ class realchar(thing):
             spot.contains = self
             self.spot = spot
             self.children = [self.sprite]
-            self.sprite.pos = self.spot.pos
+            self.pos = self.sprite.pos = self.spot.pos
         return self
+    def mouse_click(self,pos,mode):
+        if not self.children:
+            return
+        x,y = pos
+        cx,cy = self.sprite.pos
+        cw,ch = self.sprite.surf.get_size()
+        if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
+            pygame.scene.children[0].action_menu(self)
         
 class weapon(thing):
     def __init__(self):
@@ -59,6 +68,7 @@ class action_menu(menu):
 class fight_scene(thing):
     def __init__(self):
         self.children = []
+        self.am = None
         self.bg = sprite("art/bunker.png",[0,0])
         self.children.append(self.bg)
         self.spots = {}
@@ -82,3 +92,8 @@ class fight_scene(thing):
         for s in self.spots.values():
             if s.contains and s.contains not in self.children:
                 self.children.append(s.contains)
+    def action_menu(self,char):
+        if self.am in self.children:
+            self.children.remove(self.am)
+        self.am = action_menu(char)
+        self.children.append(self.am)
