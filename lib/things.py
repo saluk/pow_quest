@@ -17,6 +17,10 @@ class thing(object):
         pass
     def predraw(self,surf):
         pass
+    def mouse_click(self,pos):
+        for c in reversed(self.children):
+            if c.mouse_click(pos):
+                return True
 
 class textbox(thing):
     def __init__(self,text,pos,width=150):
@@ -143,4 +147,9 @@ class menu(thing):
                 self.children.append(quick_textbox(o,[x+3,y+2],self.width-5))
                 y+=10
             self.last_options = self.options
-        
+    def mouse_click(self,pos):
+        for c in self.children:
+            if pos[0]>=c.pos[0] and pos[0]<=c.pos[0]+c.width and pos[1]>=c.pos[1] and pos[1]<=c.pos[1]+10:
+                command = c.lines[0]
+                getattr(self,command.replace(" ","_").lower())()
+                return True
