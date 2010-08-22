@@ -94,3 +94,11 @@ class sprite(thing):
         self.pos = pos
     def draw(self,surf):
         surf.blit(self.surf,self.pos)
+        
+class char(sprite):
+    def __init__(self,tag,pos,facing="s"):
+        self.tag = tag
+        self.pos = pos
+        self.set_facing(facing)
+    def set_facing(self,facing):
+        super(char,self).__init__("art/%s_%s_idle.png"%(self.tag,facing),self.pos)
