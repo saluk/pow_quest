@@ -3,6 +3,7 @@ import pygame
 pygame.init()
 
 from lib.things import *
+from lib.fight import *
 
 res = [640,400]
 fs = 0
@@ -15,20 +16,24 @@ bg = pygame.image.load("design/mockup.png")
 pygame.timer = pygame.time.Clock()
 
 scene = thing()
+pygame.scene = scene
 scene.children.append(sprite("art/bunker.png",[0,0]))
 scene.children.append(textbox_chain("50,50,150,2;This is a test of speech. \n\
 It should wrap at the right time, and go on and on and on. \
 Just a basic textbox module really.;0,0,150,2;This is another textbox.;"))
 man = char("army",[100,100])
 scene.children.append(man)
-main_menu = menu([10,30],40,["New Game","Quit"])
+main_menu = menu([10,30],40,["New Game","Quit","Fight"])
 scene.children.append(main_menu)
 def new_game():
     scene.children = [main_menu]
 def quit():
     sys.exit()
+def fight_test():
+    scene.children = [fight_scene()]
 main_menu.new_game = new_game
 main_menu.quit = quit
+main_menu.fight = fight_test
         
 running = 1
 while running:
