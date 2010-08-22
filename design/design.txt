@@ -11,5 +11,55 @@ skill based
 
 3 "classes"
     infiltrator - spy, stealthy
+        disguises
+        hiding in a box (hehe)
+        backstab
+        silent takedowns
     disruptor - explosives, cheap tricks
+        rig weapon locker to explode
+        use a lot of grenades
+        remote mines on battlefield before battle
+        sticky bombs attach to a guy, he kills his mates
+        sand in the face
     mutilator - infiltry, guns and knives
+        use a lot of cover
+        repair cover
+        ammo bags
+        heavy armor
+    
+combat is like slow motion action movie, everything is in realistic time
+combat options
+    move - can get behind cover, usually a few locations to move
+    aim at - choose someone to aim current weapon at
+        (different weapons have slower/faster aim time,
+        also depending on skill with weapon)
+    activate weapon - fire with current weapon
+        can fire before aim is complete
+        might hit target, might hit another target, might hit nothing
+    change weapon/reload
+        different times accociated with those
+    weapons have
+        hit map - region of hit probabilities
+        damage map - region of hit damage
+        
+guns are perfectly straight line, with randomized angle
+    full damage along the line
+    up to range
+grenade has a randomized region it will land, then a circle
+    defining damage (more damage at center)
+some cover can be destroyed
+
+powers:
+    telekinesis
+        shove guy down
+        shove guy into mate
+        steal weapon from guy
+        move cover
+    darkness
+        make someone afraid (suicide, kill mates)
+        blind
+        become invisible
+    elemental
+        water wave (large area, weak damage, knockdown)
+        fire wall (straight area, high damage)
+        electricity (straight area, disable weapons)
