@@ -82,3 +82,15 @@ class textbox_chain(thing):
         self.next_box -= dt
         if self.next_box<0:
             del self.children[0]
+            
+class sprite(thing):
+    images = {}
+    def __init__(self,img,pos):
+        super(sprite,self).__init__()
+        if img not in self.images:
+            self.images[img] = pygame.image.load(img).convert()
+            self.images[img].set_colorkey([255,0,255])
+        self.surf = self.images[img]
+        self.pos = pos
+    def draw(self,surf):
+        surf.blit(self.surf,self.pos)

@@ -14,9 +14,11 @@ bg = pygame.image.load("design/mockup.png")
 pygame.timer = pygame.time.Clock()
 
 scene = thing()
+scene.children.append(sprite("art/bunker.png",[0,0]))
 scene.children.append(textbox_chain("50,50,150,2;This is a test of speech. \n\
 It should wrap at the right time, and go on and on and on. \
 Just a basic textbox module really.;0,0,150,2;This is another textbox.;"))
+scene.children.append(sprite("art/army_s_idle.png",[100,100]))
         
 running = 1
 while running:
