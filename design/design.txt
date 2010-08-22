@@ -13,15 +13,3 @@ skill based
     infiltrator - spy, stealthy
     disruptor - explosives, cheap tricks
     mutilator - infiltry, guns and knives
-
-
-
-
-
-font ideas:
-    arial condensed 8
-    courier 8
-    verdana 8
-    sans 9
-    ms serif antialias
-    *lucidia console semi condensed
