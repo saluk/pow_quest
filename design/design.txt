@@ -1,0 +1,21 @@
+caught
+
+prisonor of war with psychic powers on another planet
+its an rpg
+pixel perfect movement outside of battles
+looks like pixel perfect movement inside of battles - no solid edges of things
+    (groups of enemies are not perfectly lined up)
+make battle scenes a real scene (no boring random battles, every battle like a boss)
+
+
+
+
+
+
+font ideas:
+    arial condensed 8
+    courier 8
+    verdana 8
+    sans 9
+    ms serif antialias
+    *lucidia console semi condensed
