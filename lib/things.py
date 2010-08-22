@@ -10,9 +10,12 @@ class thing(object):
     def update(self,dt):
         pass
     def draw_children(self,surf):
+        self.predraw(surf)
         [x.draw_children(surf) for x in self.children]
         self.draw(surf)
     def draw(self,surf):
+        pass
+    def predraw(self,surf):
         pass
 
 class textbox(thing):
@@ -56,6 +59,11 @@ class textbox(thing):
             rline = self.render_line(line)
             surf.blit(rline,[x,y])
             y+=rline.get_height()+1
+            
+class quick_textbox(textbox):
+    def update(self,dt):
+        while self.to_print:
+            super(quick_textbox,self).update(5)
             
 class textbox_chain(thing):
     def __init__(self,text):
@@ -102,3 +110,37 @@ class char(sprite):
         self.set_facing(facing)
     def set_facing(self,facing):
         super(char,self).__init__("art/%s_%s_idle.png"%(self.tag,facing),self.pos)
+        
+class menu(thing):
+    def __init__(self,pos,width,options=None):
+        super(menu,self).__init__()
+        self.pos = pos
+        self.width = width
+        self.options = []
+        self.last_options = None
+        if options:
+            self.options = options
+    def predraw(self,surf):
+        x,y=self.pos
+        height = len(self.options)*10
+        outcol = [124,124,124]
+        incol = [70,70,70]
+        bgcol = [0,0,0]
+        pygame.draw.rect(surf,bgcol,[[x+1,y+1],[self.width-2,height-2]])
+        pygame.draw.line(surf,outcol,[x+1,y],[x+self.width-1,y])
+        pygame.draw.line(surf,outcol,[x+1,y+height],[x+self.width-1,y+height])
+        pygame.draw.line(surf,outcol,[x,y+1],[x,y+height-1])
+        pygame.draw.line(surf,outcol,[x+self.width,y+1],[x+self.width,y+height-1])
+        pygame.draw.line(surf,incol,[x+1,y+1],[x+self.width-1,y+1])
+        pygame.draw.line(surf,incol,[x+1,y+height-1],[x+self.width-1,y+height-1])
+        pygame.draw.line(surf,incol,[x+1,y+1],[x+1,y+height-1])
+        pygame.draw.line(surf,incol,[x+self.width-1,y+1],[x+self.width-1,y+height-1])
+    def update(self,dt):
+        if self.options != self.last_options:
+            self.children = []
+            x,y = self.pos
+            for o in self.options:
+                self.children.append(quick_textbox(o,[x+3,y+2],self.width-5))
+                y+=10
+            self.last_options = self.options
+        

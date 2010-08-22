@@ -4,7 +4,7 @@ pygame.init()
 from lib.things import *
 
 res = [640,400]
-fs = 1
+fs = 0
 screen = pygame.display.set_mode(res,pygame.FULLSCREEN*fs)
 
 surf = pygame.Surface([320,200])
@@ -20,6 +20,7 @@ It should wrap at the right time, and go on and on and on. \
 Just a basic textbox module really.;0,0,150,2;This is another textbox.;"))
 man = char("army",[100,100])
 scene.children.append(man)
+scene.children.append(menu([10,30],40,["New Game","Quit"]))
         
 running = 1
 while running:
@@ -41,6 +42,7 @@ while running:
             running = 0
         if e.type==pygame.KEYDOWN and e.key==pygame.K_q and e.mod | pygame.K_LCTRL:
             running = 0
+        #if e.type==pygame.MOUSEBUTTONDOWN and e.
     keys = pygame.key.get_pressed()
     speed = 40
     if keys[pygame.K_DOWN]:
