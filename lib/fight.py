@@ -276,7 +276,9 @@ class fight_scene(thing):
     def ai(self,char):
         if char.weapon.type=="knife":
             if not char.target:
-                char.target = self.players()[0]
+                p = self.players()
+                if p:
+                    char.target = p[0]
             elif char.target not in char.spot.near():
                 options = char.spot.can_move()
                 if options:
