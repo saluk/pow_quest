@@ -1,4 +1,5 @@
 import pygame
+import sys
 from things import *
 
 class spot(thing):
@@ -163,7 +164,7 @@ def choose_closest_to(ob,spots):
     return closest
         
 class fight_scene(thing):
-    def __init__(self,restore_children):
+    def __init__(self,restore_children,goodies,enemies):
         pygame.fight_scene = self
         self.restore_children = restore_children
         self.children = []
@@ -175,24 +176,23 @@ class fight_scene(thing):
         for s in self.spots.values():
             self.children.append(s)
         
-        self.spots["door"] = self.spots[(101.60000000000001, 46.333333333333329)]
-        self.spots["mid"] = self.spots[(120.40000000000001, 49.333333333333329)]
-        self.spots["right"] = self.spots[(143.20000000000002, 49.333333333333329)]
-        enemy = realchar().set_spot(self.spots["door"])
-        enemy.weapon = weapon()
-        enemy.weapon.type = "knife"
-        enemy.weapon.damage = 3
-        enemy.enemy = True
-        player = realchar().set_spot(self.spots["mid"])
-        player.weapon = weapon()
-        player.sprite.set_facing("n")
-        self.participants = [enemy,player]
-        enemy = realchar().set_spot(self.spots["right"])
-        enemy.weapon = weapon()
-        enemy.weapon.type = "knife"
-        enemy.weapon.damage = 3
-        enemy.enemy = True
-        self.participants.append(enemy)
+        self.goodies = goodies
+        for good in goodies:
+            spot = choose_closest_to(good,self.spots.values())
+            player = realchar().set_spot(spot)
+            player.weapon = weapon()
+            player.sprite.set_facing("n")
+            self.participants = [player]
+        
+        self.enemies = enemies
+        for enemy in enemies:
+            spot = choose_closest_to(enemy,self.spots.values())
+            enemy = realchar().set_spot(spot)
+            enemy.weapon = weapon()
+            enemy.weapon.type = "knife"
+            enemy.weapon.damage = 3
+            enemy.enemy = True
+            self.participants.append(enemy)
         
         self.menus = thing()
         self.children.append(self.menus)
@@ -264,6 +264,12 @@ class fight_scene(thing):
     def finish(self):
         if len(self.participants)==1:
             pygame.scene.children = self.restore_children
+            if self.participants[0].enemy:
+                print "you lose"
+                sys.exit()
+            for e in self.enemies:
+                e.kill = 1
+            self.goodies[0].pos = self.participants[0].pos
     def players(self):
         return [x for x in self.participants if not x.enemy]
     def ai(self,char):
