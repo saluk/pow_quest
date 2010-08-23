@@ -23,7 +23,7 @@ It should wrap at the right time, and go on and on and on. \
 Just a basic textbox module really.;0,0,150,2;This is another textbox.;"))
 man = char("army",[100,100])
 scene.children.append(man)
-main_menu = menu([10,30],40,["New Game","Quit","Fight","Popup"])
+main_menu = menu([10,30],60,["New Game","Quit","Fight","Popup","edit fight"])
 scene.children.append(main_menu)
 def new_game():
     scene.children = [main_menu]
@@ -33,10 +33,14 @@ def fight_test():
     scene.children = [fight_scene(scene.children)]
 def popup():
     scene.children.append(popup_text("Some popup text",[150,30]))
+def edit_fight():
+    import lib.fight_edit
+    scene.children = [lib.fight_edit.edit(scene.children)]
 main_menu.new_game = new_game
 main_menu.quit = quit
 main_menu.fight = fight_test
 main_menu.popup = popup
+main_menu.edit_fight = edit_fight
         
 running = 1
 while running:
