@@ -123,8 +123,13 @@ class sprite(thing):
             self.images[img].set_colorkey([255,0,255])
         self.surf = self.images[img]
         self.pos = pos
+        self.center = False
     def draw(self,surf):
-        surf.blit(self.surf,self.pos)
+        cp = self.pos[:]
+        if self.center:
+            cp[0]-=self.surf.get_width()//2
+            cp[1]-=self.surf.get_height()//2
+        surf.blit(self.surf,cp)
         
 class char(sprite):
     def __init__(self,tag,pos,facing="s"):
@@ -133,6 +138,7 @@ class char(sprite):
         self.set_facing(facing)
     def set_facing(self,facing):
         super(char,self).__init__("art/%s_%s_idle.png"%(self.tag,facing),self.pos)
+        self.center = True
         
 class menu(thing):
     def __init__(self,pos,width,options=None):

@@ -17,7 +17,8 @@ pygame.timer = pygame.time.Clock()
 
 scene = thing()
 pygame.scene = scene
-scene.children.append(sprite("art/bunker.png",[0,0]))
+bunker = sprite("art/bunker.png",[0,0])
+scene.children.append(bunker)
 scene.children.append(textbox_chain("50,50,150,2;This is a test of speech. \n\
 It should wrap at the right time, and go on and on and on. \
 Just a basic textbox module really.;0,0,150,2;This is another textbox.;"))
@@ -41,6 +42,13 @@ main_menu.quit = quit
 main_menu.fight = fight_test
 main_menu.popup = popup
 main_menu.edit_fight = edit_fight
+
+
+bgcolor = (215,196,146)
+def col(man,bg):
+    if bg.get_at([int(x) for x in man.pos])[:3] != bgcolor:
+        return True
+    return False
         
 running = 1
 while running:
@@ -68,15 +76,29 @@ while running:
             scene.mouse_click(p)
     keys = pygame.key.get_pressed()
     speed = 40
-    if keys[pygame.K_DOWN]:
-        man.set_facing("s")
-        man.pos[1]+=speed*dt
+    
+    op = man.pos[:]
+    def vert(man,amt):
+        man.pos[1]+=amt*dt
+        if col(man,bunker.surf):
+            man.pos[1]-=amt*dt
+    def horiz(man,amt):
+        man.pos[0]+=amt*dt
+        if col(man,bunker.surf):
+            man.pos[0]-=amt*dt
     if keys[pygame.K_RIGHT]:
         man.set_facing("e")
-        man.pos[0]+=speed*dt
+        horiz(man,speed)
+        #vert(man,speed/3)
     if keys[pygame.K_LEFT]:
         man.set_facing("w")
-        man.pos[0]-=speed*dt
+        horiz(man,-speed)
+        #vert(man,-speed/3)
+    if keys[pygame.K_DOWN]:
+        man.set_facing("s")
+        vert(man,speed)
+        #horiz(man,-speed/3)
     if keys[pygame.K_UP]:
         man.set_facing("n")
-        man.pos[1]-=speed*dt
+        vert(man,-speed)
+        #horiz(man,speed/3)
