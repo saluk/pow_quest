@@ -149,6 +149,18 @@ class aim_menu(thing):
                 self.char.target = s
                 pygame.fight_scene.next()
                 return True
+                
+def choose_closest_to(ob,spots):
+    closest = None
+    cd = None
+    p = ob.pos
+    for s in spots:
+        sp = s.pos
+        d = (sp[0]-p[0])**2+(sp[1]-p[1])**2
+        if not closest or d<cd:
+            cd = d
+            closest = s
+    return closest
         
 class fight_scene(thing):
     def __init__(self,restore_children):
@@ -261,7 +273,7 @@ class fight_scene(thing):
             elif char.target not in char.spot.near():
                 options = char.spot.can_move()
                 if options:
-                    char.set_spot(options[0])
+                    char.set_spot(choose_closest_to(char.target,options))
             else:
                 self.shoot(char)
         self.next()
