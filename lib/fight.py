@@ -11,7 +11,7 @@ class spot(thing):
     def near_enemy(self):
         for n in self.next:
             if n.contains:
-                if n.enemy == True:
+                if n.contains.enemy == True:
                     return n
     def near(self):
         near = []
@@ -47,6 +47,8 @@ class realchar(thing):
         self.health_bar.pos = [self.sprite.pos[0]+5,self.sprite.pos[1]+5]
         self.health_bar.lines = ["%s/30"%self.hp]
         self.health_bar.draw(surf)
+        if self.target:
+            pygame.draw.line(surf,[100,100,100],self.pos,self.target.pos)
     def set_spot(self,spot):
         if self.spot:
             self.spot.contains = None
@@ -121,7 +123,7 @@ class move_menu(thing):
             cw=ch=20
             if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
                 self.char.set_spot(s)
-                pygame.fight_scene.next_input()
+                pygame.fight_scene.next()
                 return True
                 
 class aim_menu(thing):
@@ -143,7 +145,7 @@ class aim_menu(thing):
             cw=ch=20
             if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
                 self.char.target = s
-                pygame.fight_scene.next_input()
+                pygame.fight_scene.next()
                 return True
         
 class fight_scene(thing):
@@ -176,12 +178,30 @@ class fight_scene(thing):
         player.weapon = weapon()
         player.sprite.set_facing("n")
         self.participants = [enemy,player]
+        enemy = realchar().set_spot(self.spots["right"])
+        enemy.weapon = weapon()
+        enemy.weapon.type = "knife"
+        enemy.weapon.damage = 3
+        enemy.enemy = True
+        self.participants.append(enemy)
         
         self.menus = thing()
         self.children.append(self.menus)
-        
-        self.mode = "wait"
+        self.turns = ["wait"]
+        self.calc_turns()
+    def calc_turns(self):
+        self.turn_start = True
+        for p in self.participants:
+            self.turns.append(p)
+            self.turns.append("wait")
         self.next_mode = 1
+    def next(self):
+        self.turn_start = True
+        self.menus.children = []
+        if self.turns:
+            del self.turns[0]
+        if not self.turns:
+            self.calc_turns()
     def action_menu(self,char):
         self.menus.children = [action_menu(char)]
     def move_menu(self,char):
@@ -190,9 +210,8 @@ class fight_scene(thing):
         self.menus.children = [aim_menu(char,self.participants)]
     def shoot_menu(self,char):
         self.menus.children = []
-        self.mode = "wait"
         self.shoot(char)
-    
+        self.next()
     def shoot(self,char):
         char.target.hp-=char.weapon.damage
         tp = char.target.pos
@@ -200,33 +219,41 @@ class fight_scene(thing):
         if char.target.hp<=0:
             char.target.set_spot(None)
             self.participants.remove(char.target)
-            char.target = None
-        
-    def next_input(self):
-        """Choose another character to act, or resume iteration"""
-        self.menus.children = []
-        self.mode = "wait"
+            self.clear_targets()
     def update(self,dt):
         "Update timers if no interface is up"
-        if self.mode == "act":
-            self.action_menu(self.participants[1])
-            self.ai(self.participants[0])
-            self.mode = "actwait"
-        if self.mode in ["wait"]:
+        nt = self.turns[0]
+        if nt == "wait":
+            self.turn_start = False
             self.finish()
             self.next_mode -= dt
             if self.next_mode <= 0:
-                self.mode = "act"
+                self.next()
                 self.next_mode = 1
+        elif self.turn_start:
+            self.turn_start = False
+            p = nt
+            if p.enemy:
+                self.ai(p)
+            else:
+                self.action_menu(self.players()[0])
+    def clear_targets(self):
+        for p in self.participants:
+            if p.target not in self.participants:
+                p.target = None
     def finish(self):
         if len(self.participants)==1:
             pygame.scene.children = self.restore_children
+    def players(self):
+        return [x for x in self.participants if not x.enemy]
     def ai(self,char):
         if char.weapon.type=="knife":
-            if self.participants[1] not in char.spot.near():
+            if not char.target:
+                char.target = self.players()[0]
+            elif char.target not in char.spot.near():
                 options = char.spot.can_move()
-                char.set_spot(options[0])
-            elif not char.target:
-                char.target = self.participants[1]
+                if options:
+                    char.set_spot(options[0])
             else:
                 self.shoot(char)
+        self.next()
