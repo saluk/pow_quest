@@ -43,14 +43,14 @@ class realchar(thing):
             self.children = [self.sprite]
             self.pos = self.sprite.pos = self.spot.pos
         return self
-    def mouse_click(self,pos,mode):
-        if not self.children:
-            return
-        x,y = pos
-        cx,cy = self.sprite.pos
-        cw,ch = self.sprite.surf.get_size()
-        if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
-            pygame.scene.children[0].action_menu(self)
+    #~ def mouse_click(self,pos,mode):
+        #~ if not self.children:
+            #~ return
+        #~ x,y = pos
+        #~ cx,cy = self.sprite.pos
+        #~ cw,ch = self.sprite.surf.get_size()
+        #~ if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
+            #~ pygame.scene.children[0].action_menu(self)
         
 class weapon(thing):
     def __init__(self):
@@ -59,7 +59,9 @@ class weapon(thing):
 class action_menu(menu):
     """The fighting menu for a person"""
     def __init__(self,character):
-        super(action_menu,self).__init__(character.pos,60)
+        x,y = character.pos
+        x+=16
+        super(action_menu,self).__init__([x,y],60)
         self.character = character
         self.init_options()
     def init_options(self):
@@ -75,7 +77,7 @@ class action_menu(menu):
             self.options.append("move")
         self.options.append("idle")
     def move(self):
-        pygame.scene.children[0].menus.children = [move_menu(self.character)]
+        pygame.fight_scene.menus.children = [move_menu(self.character)]
 
 class move_menu(thing):
     def __init__(self,char):
@@ -97,11 +99,13 @@ class move_menu(thing):
             cw=ch=20
             if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
                 self.char.set_spot(s)
-                pygame.scene.children[0].menus.children.remove(self)
+                pygame.fight_scene.menus.children.remove(self)
+                pygame.fight_scene.mode = "wait"
                 return True
         
 class fight_scene(thing):
     def __init__(self):
+        pygame.fight_scene = self
         self.children = []
         self.bg = sprite("art/bunker.png",[0,0])
         self.children.append(self.bg)
@@ -125,9 +129,23 @@ class fight_scene(thing):
         player = realchar().set_spot(self.spots["mid"])
         player.weapon = weapon()
         player.sprite.set_facing("n")
+        self.participants = [enemy,player]
         
         self.menus = thing()
         self.children.append(self.menus)
+        
+        self.mode = "wait"
+        self.next_mode = 1
     def action_menu(self,char):
         am = action_menu(char)
         self.menus.children = [am]
+    def update(self,dt):
+        "Update timers if no interface is up"
+        if self.mode == "act":
+            self.action_menu(self.participants[1])
+            self.mode = "actwait"
+        if self.mode in ["wait"]:
+            self.next_mode -= dt
+            if self.next_mode <= 0:
+                self.mode = "act"
+                self.next_mode = 1
