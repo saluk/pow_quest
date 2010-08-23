@@ -38,10 +38,15 @@ class realchar(thing):
         self.spot = None
         self.weapon = None
         self.sprite = char("army",[100,100])
+        self.health_bar = quick_textbox("",[100,100])
         self.children = []
         self.enemy = False
         self.action = None
         self.target = None
+    def draw(self,surf):
+        self.health_bar.pos = [self.sprite.pos[0]+5,self.sprite.pos[1]+5]
+        self.health_bar.lines = ["%s/30"%self.hp]
+        self.health_bar.draw(surf)
     def set_spot(self,spot):
         if self.spot:
             self.spot.contains = None
@@ -190,10 +195,8 @@ class fight_scene(thing):
     
     def shoot(self,char):
         char.target.hp-=char.weapon.damage
-        print char.target.hp
         tp = char.target.pos
         self.children.append(popup_text(str(char.weapon.damage),tp[:]))
-        self.children.append(popup_text(str(char.target.hp),[tp[0]+16,tp[1]]))
         if char.target.hp<=0:
             char.target.set_spot(None)
             self.participants.remove(char.target)
