@@ -262,14 +262,15 @@ class fight_scene(thing):
             if p.target not in self.participants:
                 p.target = None
     def finish(self):
-        if len(self.participants)==1:
-            pygame.scene.children = self.restore_children
-            if self.participants[0].enemy:
-                print "you lose"
-                sys.exit()
+        if not [x for x in self.participants if x.enemy]:
             for e in self.enemies:
                 e.kill = 1
             self.goodies[0].pos = self.participants[0].pos
+            pygame.scene.children = self.restore_children
+        if not [x for x in self.participants if not x.enemy]:
+            print "you lose"
+            sys.exit()
+
     def players(self):
         return [x for x in self.participants if not x.enemy]
     def ai(self,char):
