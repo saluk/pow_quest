@@ -5,6 +5,7 @@ from things import *
 class spot(thing):
     """A spot someone can be placed in on the fight screen"""
     def __init__(self,pos,next=None):
+        super(spot,self).__init__()
         self.children = []
         self.pos = pos
         self.next = []
@@ -36,6 +37,7 @@ class spot(thing):
                 
 class realchar(thing):
     def __init__(self):
+        super(realchar,self).__init__()
         self.hp = 30
         self.pos = [0,0]
         self.spot = None
@@ -75,6 +77,7 @@ class realchar(thing):
         
 class weapon(thing):
     def __init__(self):
+        super(weapon,self).__init__()
         self.type = "gun"
         self.damage = 10
 
@@ -108,6 +111,7 @@ class action_menu(menu):
 
 class move_menu(thing):
     def __init__(self,char):
+        super(move_menu,self).__init__()
         self.children = []
         self.char = char
         self.start = self.char.spot
@@ -131,6 +135,7 @@ class move_menu(thing):
                 
 class aim_menu(thing):
     def __init__(self,char,chars):
+        super(aim_menu,self).__init__()
         self.children = []
         self.char = char
         self.chars = chars
@@ -165,6 +170,7 @@ def choose_closest_to(ob,spots):
         
 class fight_scene(thing):
     def __init__(self,restore_children,goodies,enemies):
+        super(fight_scene,self).__init__()
         pygame.fight_scene = self
         self.restore_children = restore_children
         self.children = []
