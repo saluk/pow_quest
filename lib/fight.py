@@ -3,10 +3,12 @@ from things import *
 
 class spot(thing):
     """A spot someone can be placed in on the fight screen"""
-    def __init__(self,pos,next=[]):
+    def __init__(self,pos,next=None):
         self.children = []
         self.pos = pos
-        self.next = next
+        self.next = []
+        if next:
+            self.next = next
         self.contains = None
     def near_enemy(self):
         for n in self.next:
@@ -157,18 +159,13 @@ class fight_scene(thing):
         self.children.append(self.bg)
         self.spots = {}
         
-        self.spots["door"] = spot([176,46])
-        self.spots["mid"] = spot([169,94])
-        self.spots["right"] = spot([211,96])
-        self.spots["left"] = spot([131,82])
-        
-        self.spots["door"].next = [self.spots["mid"]]
-        self.spots["mid"].next = [self.spots["left"],self.spots["right"],self.spots["door"]]
-        self.spots["left"].next = [self.spots["mid"]]
-        self.spots["right"].next = [self.spots["mid"]]
+        self.load_spots_from_file("data/fight1.txt")
         for s in self.spots.values():
             self.children.append(s)
         
+        self.spots["door"] = self.spots[(101.60000000000001, 46.333333333333329)]
+        self.spots["mid"] = self.spots[(120.40000000000001, 49.333333333333329)]
+        self.spots["right"] = self.spots[(143.20000000000002, 49.333333333333329)]
         enemy = realchar().set_spot(self.spots["door"])
         enemy.weapon = weapon()
         enemy.weapon.type = "knife"
@@ -189,6 +186,17 @@ class fight_scene(thing):
         self.children.append(self.menus)
         self.turns = ["wait"]
         self.calc_turns()
+    def load_spots_from_file(self,file):
+        self.spots = {}
+        points,connections = open(file).read().split("\n")
+        points = eval(points)
+        connections = eval(connections)
+        for p in points:
+            self.spots[tuple(p)] = spot(list(p))
+        for c in connections:
+            a,b = c
+            self.spots[tuple(a)].next.append(self.spots[tuple(b)])
+            self.spots[tuple(b)].next.append(self.spots[tuple(a)])
     def calc_turns(self):
         self.turn_start = True
         for p in self.participants:
