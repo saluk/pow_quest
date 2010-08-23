@@ -33,6 +33,7 @@ class realchar(thing):
         self.sprite = char("army",[100,100])
         self.children = []
         self.enemy = False
+        self.action = None
     def set_spot(self,spot):
         if self.spot:
             self.spot.contains = None
@@ -77,7 +78,7 @@ class action_menu(menu):
             self.options.append("move")
         self.options.append("idle")
     def move(self):
-        pygame.fight_scene.menus.children = [move_menu(self.character)]
+        pygame.fight_scene.move_menu(self.character)
 
 class move_menu(thing):
     def __init__(self,char):
@@ -99,8 +100,7 @@ class move_menu(thing):
             cw=ch=20
             if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
                 self.char.set_spot(s)
-                pygame.fight_scene.menus.children.remove(self)
-                pygame.fight_scene.mode = "wait"
+                pygame.fight_scene.next_input()
                 return True
         
 class fight_scene(thing):
@@ -137,8 +137,13 @@ class fight_scene(thing):
         self.mode = "wait"
         self.next_mode = 1
     def action_menu(self,char):
-        am = action_menu(char)
-        self.menus.children = [am]
+        self.menus.children = [action_menu(char)]
+    def move_menu(self,char):
+        self.menus.children = [move_menu(char)]
+    def next_input(self):
+        """Choose another character to act, or resume iteration"""
+        self.menus.children = []
+        self.mode = "wait"
     def update(self,dt):
         "Update timers if no interface is up"
         if self.mode == "act":
