@@ -165,6 +165,7 @@ class fight_scene(thing):
         enemy = realchar().set_spot(self.spots["door"])
         enemy.weapon = weapon()
         enemy.weapon.type = "knife"
+        enemy.weapon.damage = 3
         enemy.enemy = True
         player = realchar().set_spot(self.spots["mid"])
         player.weapon = weapon()
@@ -189,6 +190,10 @@ class fight_scene(thing):
     
     def shoot(self,char):
         char.target.hp-=char.weapon.damage
+        print char.target.hp
+        tp = char.target.pos
+        self.children.append(popup_text(str(char.weapon.damage),tp[:]))
+        self.children.append(popup_text(str(char.target.hp),[tp[0]+16,tp[1]]))
         if char.target.hp<=0:
             char.target.set_spot(None)
             self.participants.remove(char.target)
@@ -200,7 +205,6 @@ class fight_scene(thing):
         self.mode = "wait"
     def update(self,dt):
         "Update timers if no interface is up"
-        print self.mode,self.participants
         if self.mode == "act":
             self.action_menu(self.participants[1])
             self.ai(self.participants[0])

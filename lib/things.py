@@ -1,12 +1,14 @@
 import pygame
 
 class thing(object):
+    kill = 0
     def __init__(self):
         self.children = []
         self.pos = [0,0]
     def update_children(self,dt):
         [x.update_children(dt) for x in self.children]
         self.update(dt)
+        self.children = [x for x in self.children if not x.kill]
     def update(self,dt):
         pass
     def draw_children(self,surf):
@@ -68,6 +70,23 @@ class quick_textbox(textbox):
     def update(self,dt):
         while self.to_print:
             super(quick_textbox,self).update(5)
+            
+class popup_text(quick_textbox):
+    direction = -1
+    time = 0.3
+    def update(self,dt):
+        super(popup_text,self).update(dt)
+        self.time -= dt
+        self.pos[1] += self.direction
+        if self.time<0:
+            if self.direction == -1:
+                self.direction = 1
+                self.time = 0.3
+            elif self.direction == 1:
+                self.direction = 0
+                self.time = 0.3
+            else:
+                self.kill = 1
             
 class textbox_chain(thing):
     def __init__(self,text):
