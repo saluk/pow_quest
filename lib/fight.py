@@ -27,6 +27,7 @@ class spot(thing):
                 
 class realchar(thing):
     def __init__(self):
+        self.hp = 30
         self.pos = [0,0]
         self.spot = None
         self.weapon = None
@@ -34,10 +35,13 @@ class realchar(thing):
         self.children = []
         self.enemy = False
         self.action = None
+        self.target = None
     def set_spot(self,spot):
         if self.spot:
             self.spot.contains = None
         self.children = []
+        if not spot:
+            return
         if not spot.contains:
             spot.contains = self
             self.spot = spot
@@ -56,6 +60,7 @@ class realchar(thing):
 class weapon(thing):
     def __init__(self):
         self.type = "gun"
+        self.damage = 10
 
 class action_menu(menu):
     """The fighting menu for a person"""
@@ -69,16 +74,21 @@ class action_menu(menu):
         character = self.character
         if character.weapon:
             self.options.append("aim")
-            if character.weapon.type == "gun":
-                self.options.append("shoot")
-            if character.weapon.type == "knife":
-                if character.spot.near_enemy():
-                    self.options.append("slice")
+            if character.target:
+                if character.weapon.type == "gun":
+                    self.options.append("shoot")
+                if character.weapon.type == "knife":
+                    if character.spot.near_enemy():
+                        self.options.append("slice")
         if character.spot.can_move():
             self.options.append("move")
         self.options.append("idle")
     def move(self):
         pygame.fight_scene.move_menu(self.character)
+    def aim(self):
+        pygame.fight_scene.aim_menu(self.character)
+    def shoot(self):
+        pygame.fight_scene.shoot_menu(self.character)
 
 class move_menu(thing):
     def __init__(self,char):
@@ -102,10 +112,33 @@ class move_menu(thing):
                 self.char.set_spot(s)
                 pygame.fight_scene.next_input()
                 return True
+                
+class aim_menu(thing):
+    def __init__(self,char,chars):
+        self.children = []
+        self.char = char
+        self.chars = chars
+    def draw(self,surf):
+        for s in self.chars:
+            x = s.pos[0]-10
+            y = s.pos[1]-10
+            pygame.draw.rect(surf,[255,0,0],[[x,y],[20,20]])
+            pygame.draw.line(surf,[255,255,255],self.char.pos,s.pos)
+    def mouse_click(self,pos,mode):
+        x,y = pos
+        for s in self.chars:
+            cx = s.pos[0]-10
+            cy = s.pos[1]-10
+            cw=ch=20
+            if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
+                self.char.target = s
+                pygame.fight_scene.next_input()
+                return True
         
 class fight_scene(thing):
-    def __init__(self):
+    def __init__(self,restore_children):
         pygame.fight_scene = self
+        self.restore_children = restore_children
         self.children = []
         self.bg = sprite("art/bunker.png",[0,0])
         self.children.append(self.bg)
@@ -140,6 +173,21 @@ class fight_scene(thing):
         self.menus.children = [action_menu(char)]
     def move_menu(self,char):
         self.menus.children = [move_menu(char)]
+    def aim_menu(self,char):
+        self.menus.children = [aim_menu(char,self.participants)]
+    def shoot_menu(self,char):
+        self.menus.children = []
+        self.mode = "wait"
+        self.shoot(char)
+    
+    def shoot(self,char):
+        self.menus.children = []
+        char.target.hp-=char.weapon.damage
+        if char.target.hp<=0:
+            char.target.set_spot(None)
+            self.participants.remove(char.target)
+            char.target = None
+        
     def next_input(self):
         """Choose another character to act, or resume iteration"""
         self.menus.children = []
@@ -150,7 +198,11 @@ class fight_scene(thing):
             self.action_menu(self.participants[1])
             self.mode = "actwait"
         if self.mode in ["wait"]:
+            self.finish()
             self.next_mode -= dt
             if self.next_mode <= 0:
                 self.mode = "act"
                 self.next_mode = 1
+    def finish(self):
+        if len(self.participants)==1:
+            pygame.scene.children = self.restore_children

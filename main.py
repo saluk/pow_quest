@@ -5,8 +5,8 @@ pygame.init()
 from lib.things import *
 from lib.fight import *
 
-res = [640,400]
-fs = 0
+res = [1366,768]
+fs = 1
 screen = pygame.display.set_mode(res,pygame.FULLSCREEN*fs)
 
 surf = pygame.Surface([320,200])
@@ -30,7 +30,7 @@ def new_game():
 def quit():
     sys.exit()
 def fight_test():
-    scene.children = [fight_scene()]
+    scene.children = [fight_scene(scene.children)]
 main_menu.new_game = new_game
 main_menu.quit = quit
 main_menu.fight = fight_test
