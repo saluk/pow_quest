@@ -13,6 +13,12 @@ class spot(thing):
             if n.contains:
                 if n.enemy == True:
                     return n
+    def near(self):
+        near = []
+        for n in self.next:
+            if n.contains:
+                near.append(n.contains)
+        return near
     def can_move(self):
         spots = []
         for n in self.next:
@@ -158,6 +164,7 @@ class fight_scene(thing):
         
         enemy = realchar().set_spot(self.spots["door"])
         enemy.weapon = weapon()
+        enemy.weapon.type = "knife"
         enemy.enemy = True
         player = realchar().set_spot(self.spots["mid"])
         player.weapon = weapon()
@@ -181,7 +188,6 @@ class fight_scene(thing):
         self.shoot(char)
     
     def shoot(self,char):
-        self.menus.children = []
         char.target.hp-=char.weapon.damage
         if char.target.hp<=0:
             char.target.set_spot(None)
@@ -194,8 +200,10 @@ class fight_scene(thing):
         self.mode = "wait"
     def update(self,dt):
         "Update timers if no interface is up"
+        print self.mode,self.participants
         if self.mode == "act":
             self.action_menu(self.participants[1])
+            self.ai(self.participants[0])
             self.mode = "actwait"
         if self.mode in ["wait"]:
             self.finish()
@@ -206,3 +214,12 @@ class fight_scene(thing):
     def finish(self):
         if len(self.participants)==1:
             pygame.scene.children = self.restore_children
+    def ai(self,char):
+        if char.weapon.type=="knife":
+            if self.participants[1] not in char.spot.near():
+                options = char.spot.can_move()
+                char.set_spot(options[0])
+            elif not char.target:
+                char.target = self.participants[1]
+            else:
+                self.shoot(char)
