@@ -5,7 +5,10 @@ class thing(object):
     def __init__(self):
         self.children = []
         self.pos = [0,0]
+        self.sort_mode = None
     def update_children(self,dt):
+        if self.sort_mode == "y":
+            self.children.sort(key=lambda o: o.pos[1])
         [x.update_children(dt) for x in self.children]
         self.update(dt)
         self.children = [x for x in self.children if not x.kill]
