@@ -1,5 +1,6 @@
 import sys
 import pygame
+import random
 pygame.init()
 
 from lib.things import *
@@ -23,9 +24,15 @@ scene.children.append(textbox_chain("50,50,150,2;This is a test of speech. \n\
 It should wrap at the right time, and go on and on and on. \
 Just a basic textbox module really.;0,0,150,2;This is another textbox.;"))
 man = char("army",[100,100])
-enemy_man = char("army",[176,45])
-scene.children.append(man)
-scene.children.append(enemy_man)
+scene.sprites = thing()
+scene.sprites.sort_mode = "y"
+scene.children.append(scene.sprites)
+enemies = []
+for x in range(5):
+    enemy_man = char("army",[random.randint(40,240),random.randint(40,240)])
+    scene.sprites.children.append(enemy_man)
+    enemies.append(enemy_man)
+scene.sprites.children.append(man)
 main_menu = menu([10,30],60,["New Game","Quit","Fight","Popup","edit fight"])
 scene.children.append(main_menu)
 def new_game():
@@ -33,7 +40,7 @@ def new_game():
 def quit():
     sys.exit()
 def fight_test():
-    scene.children = [fight_scene(scene.children,[man],[enemy_man])]
+    scene.children = [fight_scene(scene.children,[man],enemies)]
 def popup():
     scene.children.append(popup_text("Some popup text",[150,30]))
 def edit_fight():
