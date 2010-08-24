@@ -77,13 +77,14 @@ class edit(thing):
         self.interface = thing()
         self.children.insert(0,self.interface)
         try:
-            self.load(pygame.scrap.get(pygame.SCRAP_TEXT))
+            self.load(pygame.scrap.get(pygame.SCRAP_TEXT).strip().replace("\x00","").replace("\r\n","\n"))
         except:
-            pass
+            raise
     def load(self,text):
+        print repr(text)
         points,connections = text.split("\n")
         self.points = eval(points)
-        self.connections = eval(connections[:-1])
+        self.connections = eval(connections)
     def save(self):
         print repr(self.points)
         print repr(self.connections)
