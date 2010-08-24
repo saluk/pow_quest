@@ -24,7 +24,7 @@ class scene_menu(menu):
 
 class edit_menu(menu):
     def update(self,dt):
-        self.options = ["load scene","new scene","exit"]
+        self.options = ["load scene","new scene","save","exit"]
         super(edit_menu,self).update(dt)
     def load_scene(self):
         sm = scene_menu()
@@ -62,6 +62,7 @@ class move_object(thing):
         self.char = char
     def mouse_click(self,pos,mode):
         self.char.pos = pos
+        self.char.data["pos"] = pos
         self.kill = 1
         return True
         
@@ -113,6 +114,8 @@ class edit(thing):
         for o in self.obdat:
             if o.data["scene"] == self.scene_name:
                 self.objects.children.append(o)
+        points,connections = open("data/"+self.scene_data["fight"]+".txt")
+        self.points,self.connections = [eval(points),eval(connections)]
     def save(self):
         print repr(self.points)
         print repr(self.connections)
