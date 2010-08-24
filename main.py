@@ -60,6 +60,8 @@ def load_scene(scene_name,char):
     
     pygame.scene.enemies = []
     for ob in scene["obs"]:
+        if ob.kill:
+            continue
         pygame.scene.sprites.children.append(ob)
         if getattr(ob,"is_enemy",False):
             pygame.scene.enemies.append(ob)
