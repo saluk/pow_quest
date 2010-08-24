@@ -18,6 +18,9 @@ pygame.timer = pygame.time.Clock()
 
 scene = thing()
 pygame.scene = scene
+pygame.gui = thing()
+game = thing()
+game.children = [pygame.scene,pygame.gui]
 
 def load_scene(scene_name,char):
     scene = pygame.cur_scene = pygame.scene_data[scene_name]
@@ -65,7 +68,7 @@ load_scene("jail",man)
 
 scene.sprites.children.append(man)
 main_menu = menu([10,30],60,["New Game","Quit","Fight","Popup","edit fight"])
-scene.children.append(main_menu)
+pygame.gui.children.append(main_menu)
 def new_game():
     scene.children = [main_menu]
 def quit():
@@ -104,8 +107,8 @@ while running:
     
     surf.fill([0,0,0])
     
-    scene.update_children(dt)
-    scene.draw_children(surf)
+    game.update_children(dt)
+    game.draw_children(surf)
     
     screen.blit(pygame.transform.scale(surf,res),[0,0])
     pygame.display.flip()
@@ -121,7 +124,7 @@ while running:
         if e.type==pygame.MOUSEBUTTONDOWN:
             sc = 320.0/res[0],200.0/res[1]
             p = [int(e.pos[0]*sc[0]),int(e.pos[1]*sc[1])]
-            scene.mouse_click(p)
+            game.mouse_click(p)
     keys = pygame.key.get_pressed()
     speed = 40
     
