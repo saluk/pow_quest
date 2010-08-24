@@ -22,7 +22,33 @@ pygame.gui = thing()
 game = thing()
 game.children = [pygame.scene,pygame.gui]
 
+
+def debug_menu():
+    main_menu = menu([10,30],60,["New Game","Quit","Fight","Popup","edit fight","edit world"])
+    pygame.scene.children.append(main_menu)
+    def new_game():
+        scene.children = [main_menu]
+    def quit():
+        sys.exit()
+    def fight_test():
+        scene.children = [fight_scene(scene.children,[man],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"])]
+    def popup():
+        scene.children.append(popup_text("Some popup text",[150,30]))
+    def edit_fight():
+        import lib.fight_edit
+        scene.children = [lib.fight_edit.edit(scene.children)]
+    def edit_world():
+        import lib.world_edit
+        scene.children = [lib.world_edit.edit(scene.children,pygame.cur_scene_name)]
+    main_menu.new_game = new_game
+    main_menu.quit = quit
+    main_menu.fight = fight_test
+    main_menu.popup = popup
+    main_menu.edit_fight = edit_fight
+    main_menu.edit_world = edit_world
+
 def load_scene(scene_name,char):
+    pygame.cur_scene_name = scene_name
     scene = pygame.cur_scene = pygame.scene_data[scene_name]
     pygame.scene.children = []
     pygame.bg = sprite("art/"+scene["map"]+".png",[0,0])
@@ -40,7 +66,7 @@ def load_scene(scene_name,char):
             
     #~ if pygame.scene.enemies:
         #~ pygame.scene.children = [fight_scene(pygame.scene.children,[man],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"])]
-    
+    debug_menu()
 
 f = open("data/scenes.txt")
 pygame.scene_data = eval(f.read())
@@ -65,26 +91,7 @@ scene.children.append(bunker)
 
 man = char("army",[160,100])
 load_scene("jail",man)
-
 scene.sprites.children.append(man)
-main_menu = menu([10,30],60,["New Game","Quit","Fight","Popup","edit fight"])
-pygame.gui.children.append(main_menu)
-def new_game():
-    scene.children = [main_menu]
-def quit():
-    sys.exit()
-def fight_test():
-    scene.children = [fight_scene(scene.children,[man],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"])]
-def popup():
-    scene.children.append(popup_text("Some popup text",[150,30]))
-def edit_fight():
-    import lib.fight_edit
-    scene.children = [lib.fight_edit.edit(scene.children)]
-main_menu.new_game = new_game
-main_menu.quit = quit
-main_menu.fight = fight_test
-main_menu.popup = popup
-main_menu.edit_fight = edit_fight
 
 
 bgcolor = (215,196,146)

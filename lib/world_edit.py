@@ -38,10 +38,24 @@ class file_menu(menu):
         self.parent.bg.load("art/"+command)
         self.kill = 1
 
+class scene_menu(menu):
+    def __init__(self):
+        super(scene_menu,self).__init__([50,50],150)
+        print pygame.scene_data.keys()
+        self.options = pygame.scene_data.keys()+["stuff","more stuff"]
+    def execute(self,option):
+        command = option.lines[0]
+        self.parent.bg.load("art/"+command)
+        self.kill = 1
+
 class edit_menu(menu):
     def update(self,dt):
-        self.options = ["save","add point","connect points","clear","bg","exit"]
+        self.options = ["load scene","new scene","exit"]
         super(edit_menu,self).update(dt)
+    def load_scene(self):
+        sm = scene_menu()
+        sm.parent = self.parent
+        self.parent.children.append(sm)
     def add_point(self):
         pa = point_add()
         pa.parent = self.parent
@@ -52,11 +66,6 @@ class edit_menu(menu):
         self.parent.interface.children = [pc]
     def save(self):
         self.parent.save()
-    def bg(self):
-        fm = file_menu([0,0],150)
-        fm.dir = "art"
-        fm.parent = self.parent
-        self.parent.children.append(fm)
     def clear(self):
         self.parent.points = []
         self.parent.connections = []
@@ -64,7 +73,7 @@ class edit_menu(menu):
         self.parent.finish()
 
 class edit(thing):
-    def __init__(self,children):
+    def __init__(self,children,scene_name):
         super(edit,self).__init__()
         self.old_children = children
         self.bg = sprite("art/bunker.png",[0,0])
@@ -78,15 +87,11 @@ class edit(thing):
             self.em.kill = 0
         self.interface = thing()
         self.children.insert(0,self.interface)
-        try:
-            self.load(pygame.scrap.get(pygame.SCRAP_TEXT).strip().replace("\x00","").replace("\r\n","\n"))
-        except:
-            pass
-    def load(self,text):
-        print repr(text)
-        points,connections = text.split("\n")
-        self.points = eval(points)
-        self.connections = eval(connections)
+        self.load(scene_name)
+    def load(self,scene_name):
+        self.scene_name = scene_name
+        self.scene_data = pygame.scene_data[self.scene_name]
+        self.bg.load("art/"+self.scene_data["map"]+".png")
     def save(self):
         print repr(self.points)
         print repr(self.connections)
