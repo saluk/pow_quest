@@ -110,7 +110,8 @@ while running:
     game.update_children(dt)
     game.draw_children(surf)
     
-    screen.blit(pygame.transform.scale(surf,res),[0,0])
+    sc2x = pygame.transform.scale2x(surf)
+    screen.blit(pygame.transform.scale(sc2x,res),[0,0])
     pygame.display.flip()
     
     
