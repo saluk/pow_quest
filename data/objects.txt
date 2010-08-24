@@ -1,0 +1,4 @@
+[{"scene":"start","pos":"random","type":"enemy"},
+{"scene":"start","pos":"random","type":"enemy"},
+{"scene":"jail","pos":"random","type":"enemy"},
+]

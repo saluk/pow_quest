@@ -29,9 +29,33 @@ def load_scene(scene_name,char):
     pygame.scene.children.append(pygame.scene.sprites)
     pygame.scene.sprites.children.append(char)
     
+    pygame.scene.enemies = []
+    for ob in scene["obs"]:
+        pygame.scene.sprites.children.append(ob)
+        if getattr(ob,"is_enemy",False):
+            pygame.scene.enemies.append(ob)
+            
+    #~ if pygame.scene.enemies:
+        #~ pygame.scene.children = [fight_scene(pygame.scene.children,[man],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"])]
+    
 
 f = open("data/scenes.txt")
 pygame.scene_data = eval(f.read())
+
+pygame.all_objects = []
+for o in eval(open("data/objects.txt").read()):
+    ob = None
+    if o["pos"] == "random":
+        pos = [random.randint(40,240),random.randint(40,240)]
+    else:
+        pos = o["pos"]
+    if o["type"] == "enemy":
+        ob = char("army",pos)
+        ob.is_enemy = True
+    if ob:
+        obs = pygame.scene_data[o["scene"]].get("obs",[])
+        obs.append(ob)
+        pygame.scene_data[o["scene"]]["obs"] = obs
 
 bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
@@ -39,11 +63,6 @@ scene.children.append(bunker)
 man = char("army",[160,100])
 load_scene("jail",man)
 
-enemies = []
-for x in range(5):
-    enemy_man = char("army",[random.randint(40,240),random.randint(40,240)])
-    scene.sprites.children.append(enemy_man)
-    enemies.append(enemy_man)
 scene.sprites.children.append(man)
 main_menu = menu([10,30],60,["New Game","Quit","Fight","Popup","edit fight"])
 scene.children.append(main_menu)
@@ -52,7 +71,7 @@ def new_game():
 def quit():
     sys.exit()
 def fight_test():
-    scene.children = [fight_scene(scene.children,[man],enemies,pygame.bg,pygame.cur_scene["fight"])]
+    scene.children = [fight_scene(scene.children,[man],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"])]
 def popup():
     scene.children.append(popup_text("Some popup text",[150,30]))
 def edit_fight():
