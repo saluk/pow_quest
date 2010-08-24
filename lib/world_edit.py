@@ -117,8 +117,10 @@ class edit(thing):
         points,connections = open("data/"+self.scene_data["fight"]+".txt")
         self.points,self.connections = [eval(points),eval(connections)]
     def save(self):
-        print repr(self.points)
-        print repr(self.connections)
+        objects = repr([x.data for x in self.obdat])
+        f = open("data/objects.txt","w")
+        f.write(objects)
+        f.close()
     def finish(self):
         pygame.scene.children = self.old_children
     def add_connection(self,points):

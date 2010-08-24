@@ -1,4 +1,1 @@
-[{"scene":"start","pos":"random","type":"enemy"},
-{"scene":"start","pos":"random","type":"enemy"},
-{"scene":"jail","pos":"random","type":"enemy"},
-]
+[{'type': 'enemy', 'scene': 'start', 'pos': 'random'}, {'type': 'enemy', 'scene': 'start', 'pos': 'random'}, {'type': 'enemy', 'scene': 'jail', 'pos': [159, 56]}]
