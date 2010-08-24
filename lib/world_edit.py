@@ -1,4 +1,5 @@
 import pygame
+import random
 import os
 pygame.scrap.init()
 from things import *
@@ -40,12 +41,11 @@ class file_menu(menu):
 
 class scene_menu(menu):
     def __init__(self):
-        super(scene_menu,self).__init__([50,50],150)
-        print pygame.scene_data.keys()
-        self.options = pygame.scene_data.keys()+["stuff","more stuff"]
+        super(scene_menu,self).__init__([50,0],150)
+        self.options = pygame.scene_data.keys()
     def execute(self,option):
         command = option.lines[0]
-        self.parent.bg.load("art/"+command)
+        self.parent.load(command)
         self.kill = 1
 
 class edit_menu(menu):
@@ -71,6 +71,9 @@ class edit_menu(menu):
         self.parent.connections = []
     def exit(self):
         self.parent.finish()
+        
+class game_object(char):
+    pass
 
 class edit(thing):
     def __init__(self,children,scene_name):
@@ -87,11 +90,24 @@ class edit(thing):
             self.em.kill = 0
         self.interface = thing()
         self.children.insert(0,self.interface)
+        self.objects = thing()
+        self.children.append(self.objects)
         self.load(scene_name)
     def load(self,scene_name):
         self.scene_name = scene_name
         self.scene_data = pygame.scene_data[self.scene_name]
         self.bg.load("art/"+self.scene_data["map"]+".png")
+        self.objects.children = []
+        for o in eval(open("data/objects.txt").read()):
+            ob = None
+            if o["pos"] == "random":
+                pos = [random.randint(40,140),random.randint(40,140)]
+            else:
+                pos = o["pos"]
+            if o["type"] == "enemy":
+                ob = game_object("army",pos)
+            if ob:
+                self.objects.children.append(ob)
     def save(self):
         print repr(self.points)
         print repr(self.connections)

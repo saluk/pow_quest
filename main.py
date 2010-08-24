@@ -75,7 +75,7 @@ pygame.all_objects = []
 for o in eval(open("data/objects.txt").read()):
     ob = None
     if o["pos"] == "random":
-        pos = [random.randint(40,240),random.randint(40,240)]
+        pos = [random.randint(40,140),random.randint(40,140)]
     else:
         pos = o["pos"]
     if o["type"] == "enemy":
