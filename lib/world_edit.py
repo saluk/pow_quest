@@ -21,10 +21,36 @@ class scene_menu(menu):
         command = option.lines[0]
         self.parent.load(command)
         self.kill = 1
+        
+class place_menu(thing):
+    def __init__(self,char):
+        super(place_menu,self).__init__()
+        self.char = char
+    def mouse_click(self,pos,mode):
+        self.char.pos = pos
+        self.char.data["pos"] = pos
+        self.parent.obdat.append(self.char)
+        self.parent.objects.children.append(self.char)
+        self.kill = 1
+        return True
+        
+class add_menu(menu):
+    def __init__(self):
+        super(add_menu,self).__init__([50,0],150)
+        self.options = ["enemy"]
+    def execute(self,option):
+        command = option.lines[0]
+        if command == "enemy":
+            ob = game_object("army",[0,0])
+        ob.data = {"type":command,"scene":self.parent.scene_name,"pos":"random"}
+        pm = place_menu(ob)
+        pm.parent = self.parent
+        self.parent.interface.children = [pm]
+        self.kill = 1
 
 class edit_menu(menu):
     def update(self,dt):
-        self.options = ["load scene","new scene","save","exit"]
+        self.options = ["load scene","new scene","add","save","exit"]
         super(edit_menu,self).update(dt)
     def load_scene(self):
         sm = scene_menu()
@@ -45,6 +71,10 @@ class edit_menu(menu):
         self.parent.connections = []
     def exit(self):
         self.parent.finish()
+    def add(self):
+        sm = add_menu()
+        sm.parent = self.parent
+        self.parent.children.append(sm)
         
 class object_menu(menu):
     def update(self,dt):
@@ -59,6 +89,7 @@ class object_menu(menu):
     def delete(self):
         self.parent.obdat.remove(self.char)
         self.char.kill = 1
+        self.kill = 1
         
 class move_object(thing):
     def __init__(self,char):
