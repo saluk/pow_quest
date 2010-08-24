@@ -4,32 +4,6 @@ import os
 pygame.scrap.init()
 from things import *
 
-class point_add(thing):
-    def mouse_click(self,pos,mode):
-        if pos in self.parent.points:
-            self.parent.points.remove(pos)
-        else:
-            self.parent.points.append(pos)
-        
-class point_connect(thing):
-    def __init__(self):
-        super(point_connect,self).__init__()
-        self.mode = "first"
-    def mouse_click(self,pos,mode):
-        if self.mode == "first":
-            for p in self.parent.points:
-                if abs(p[0]-pos[0])<5 and abs(p[1]-pos[1])<5:
-                    self.start = p
-                    self.mode = "second"
-                    return True
-        elif self.mode == "second":
-            for p in self.parent.points:
-                if abs(p[0]-pos[0])<5 and abs(p[1]-pos[1])<5:
-                    self.parent.add_connection([self.start,p])
-                    self.mode = "first"
-                    return True
-        return True
-
 class file_menu(menu):
     def update(self,dt):
         self.options = os.listdir(self.dir)
@@ -72,8 +46,33 @@ class edit_menu(menu):
     def exit(self):
         self.parent.finish()
         
+class object_menu(menu):
+    def update(self,dt):
+        self.options = ["move","cancel"]
+        super(object_menu,self).update(dt)
+    def cancel(self):
+        self.kill = 1
+    def move(self):
+        self.parent.interface.children = [move_object(self.char)]
+        self.kill = 1
+        
+class move_object(thing):
+    def __init__(self,char):
+        super(move_object,self).__init__()
+        self.char = char
+    def mouse_click(self,pos,mode):
+        self.char.pos = pos
+        self.kill = 1
+        return True
+        
 class game_object(char):
-    pass
+    def mouse_click(self,pos,mode):
+        if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+self.surf.get_width() and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+self.surf.get_height():
+            om = object_menu(pos,50)
+            om.parent = self.parent
+            om.char = self
+            self.parent.children.append(om)
+            return True
 
 class edit(thing):
     def __init__(self,children,scene_name):
@@ -92,12 +91,7 @@ class edit(thing):
         self.children.insert(0,self.interface)
         self.objects = thing()
         self.children.append(self.objects)
-        self.load(scene_name)
-    def load(self,scene_name):
-        self.scene_name = scene_name
-        self.scene_data = pygame.scene_data[self.scene_name]
-        self.bg.load("art/"+self.scene_data["map"]+".png")
-        self.objects.children = []
+        self.obdat = []
         for o in eval(open("data/objects.txt").read()):
             ob = None
             if o["pos"] == "random":
@@ -107,7 +101,18 @@ class edit(thing):
             if o["type"] == "enemy":
                 ob = game_object("army",pos)
             if ob:
-                self.objects.children.append(ob)
+                ob.parent = self
+                ob.data = o
+                self.obdat.append(ob)
+        self.load(scene_name)
+    def load(self,scene_name):
+        self.scene_name = scene_name
+        self.scene_data = pygame.scene_data[self.scene_name]
+        self.bg.load("art/"+self.scene_data["map"]+".png")
+        self.objects.children = []
+        for o in self.obdat:
+            if o.data["scene"] == self.scene_name:
+                self.objects.children.append(o)
     def save(self):
         print repr(self.points)
         print repr(self.connections)
