@@ -101,7 +101,7 @@ while running:
             running = 0
         if e.type==pygame.MOUSEBUTTONDOWN:
             sc = 320.0/res[0],200.0/res[1]
-            p = [e.pos[0]*sc[0],e.pos[1]*sc[1]]
+            p = [int(e.pos[0]*sc[0]),int(e.pos[1]*sc[1])]
             scene.mouse_click(p)
     keys = pygame.key.get_pressed()
     speed = 40
