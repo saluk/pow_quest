@@ -48,13 +48,17 @@ class edit_menu(menu):
         
 class object_menu(menu):
     def update(self,dt):
-        self.options = ["move","cancel"]
+        self.options = ["move","cancel","----","delete"]
         super(object_menu,self).update(dt)
+        setattr(self,"----",lambda: 1)
     def cancel(self):
         self.kill = 1
     def move(self):
         self.parent.interface.children = [move_object(self.char)]
         self.kill = 1
+    def delete(self):
+        self.parent.obdat.remove(self.char)
+        self.char.kill = 1
         
 class move_object(thing):
     def __init__(self,char):
