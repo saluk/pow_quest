@@ -1,4 +1,5 @@
 import pygame
+import random
 import sys
 from things import *
 
@@ -80,6 +81,7 @@ class weapon(thing):
         super(weapon,self).__init__()
         self.type = "gun"
         self.damage = 10
+        self.accuracy = 0.9
 
 class action_menu(menu):
     """The fighting menu for a person"""
@@ -187,6 +189,7 @@ class fight_scene(thing):
             spot = choose_closest_to(good,[x for x in self.spots.values() if not x.contains])
             player = realchar().set_spot(spot)
             player.weapon = weapon()
+            player.weapon.accuracy = 0.5
             player.sprite.set_facing("n")
             self.participants = [player]
         
@@ -196,6 +199,7 @@ class fight_scene(thing):
             enemy = realchar().set_spot(spot)
             enemy.weapon = weapon()
             enemy.weapon.type = "knife"
+            enemy.weapon.accuracy = 0.9
             enemy.weapon.damage = 3
             enemy.enemy = True
             self.participants.append(enemy)
@@ -239,13 +243,16 @@ class fight_scene(thing):
         self.shoot(char)
         self.next()
     def shoot(self,char):
-        char.target.hp-=char.weapon.damage
         tp = char.target.pos
-        self.children.append(popup_text(str(char.weapon.damage),tp[:]))
-        if char.target.hp<=0:
-            char.target.set_spot(None)
-            self.participants.remove(char.target)
-            self.clear_targets()
+        if random.random()<char.weapon.accuracy:
+            char.target.hp-=char.weapon.damage
+            self.children.append(popup_text(str(char.weapon.damage),tp[:]))
+            if char.target.hp<=0:
+                char.target.set_spot(None)
+                self.participants.remove(char.target)
+                self.clear_targets()
+        else:
+            self.children.append(popup_text("Miss",tp[:]))
     def update(self,dt):
         "Update timers if no interface is up"
         nt = self.turns[0]
