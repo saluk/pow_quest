@@ -97,7 +97,10 @@ def col(man):
                 man.pos = r["spot"][:]
                 return False
     bg = pygame.bg.surf
-    if bg.get_at([int(x) for x in man.pos])[:3] != bg.get_at([0,0])[:3]:
+    try:
+        if bg.get_at([int(x) for x in man.pos])[:3] != bg.get_at([0,0])[:3]:
+            return True
+    except:
         return True
     return False
         
@@ -110,7 +113,7 @@ while running:
     game.update_children(dt)
     game.draw_children(surf)
     
-    sc2x = pygame.transform.scale2x(surf)
+    sc2x = surf#pygame.transform.scale2x(surf)
     screen.blit(pygame.transform.scale(sc2x,res),[0,0])
     pygame.display.flip()
     
