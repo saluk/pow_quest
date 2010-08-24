@@ -37,7 +37,7 @@ bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
 
 man = char("army",[160,100])
-load_scene("start",man)
+load_scene("jail",man)
 
 enemies = []
 for x in range(5):
@@ -52,7 +52,7 @@ def new_game():
 def quit():
     sys.exit()
 def fight_test():
-    scene.children = [fight_scene(scene.children,[man],enemies)]
+    scene.children = [fight_scene(scene.children,[man],enemies,pygame.bg,pygame.cur_scene["fight"])]
 def popup():
     scene.children.append(popup_text("Some popup text",[150,30]))
 def edit_fight():
@@ -72,7 +72,7 @@ def col(man):
             r = pygame.cur_scene["regions"][region]
             if r["type"] == "warp":
                 load_scene(r["scene"],man)
-                man.pos = r["spot"]
+                man.pos = r["spot"][:]
                 return False
     bg = pygame.bg.surf
     if bg.get_at([int(x) for x in man.pos])[:3] != bg.get_at([0,0])[:3]:

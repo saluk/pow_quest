@@ -169,16 +169,16 @@ def choose_closest_to(ob,spots):
     return closest
         
 class fight_scene(thing):
-    def __init__(self,restore_children,goodies,enemies):
+    def __init__(self,restore_children,goodies,enemies,bg,fight):
         super(fight_scene,self).__init__()
         pygame.fight_scene = self
         self.restore_children = restore_children
         self.children = []
-        self.bg = sprite("art/bunker.png",[0,0])
+        self.bg = bg
         self.children.append(self.bg)
         self.spots = {}
         
-        self.load_spots_from_file("data/fight1.txt")
+        self.load_spots_from_file("data/%s.txt"%fight)
         for s in self.spots.values():
             self.children.append(s)
         
