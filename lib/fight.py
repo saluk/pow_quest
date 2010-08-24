@@ -79,9 +79,39 @@ class realchar(thing):
 class weapon(thing):
     def __init__(self):
         super(weapon,self).__init__()
+        self.set_stats()
+    def set_stats(self):
         self.type = "gun"
         self.damage = 10
+        self.far = 100
+        self.range = 50
+        self.close = 20
+        self.accuracy_close = 0.7
+        self.accuracy = 0.5
+        self.accuracy_far = 0.2
+
+class gun(weapon):
+    def set_stats(self):
+        self.type = "gun"
+        self.damage = 10
+        self.far = 200
+        self.range = 150
+        self.close = 50
+        self.accuracy_close = 0.7
+        self.accuracy = 0.5
+        self.accuracy_far = 0.2
+        
+class knife(weapon):
+    def set_stats(self):
+        self.type = "knife"
+        self.damage = 3
+        #Knife types can only attack from one space over anyway
+        self.far = 150
+        self.range = 150
+        self.close = 150
+        self.accuracy_close = 0.9
         self.accuracy = 0.9
+        self.accuracy_far = 0.9
 
 class action_menu(menu):
     """The fighting menu for a person"""
@@ -188,8 +218,7 @@ class fight_scene(thing):
         for good in goodies:
             spot = choose_closest_to(good,[x for x in self.spots.values() if not x.contains])
             player = realchar().set_spot(spot)
-            player.weapon = weapon()
-            player.weapon.accuracy = 0.5
+            player.weapon = gun()
             player.sprite.set_facing("n")
             self.participants = [player]
         
@@ -197,10 +226,7 @@ class fight_scene(thing):
         for enemy in enemies:
             spot = choose_closest_to(enemy,[x for x in self.spots.values() if not x.contains])
             enemy = realchar().set_spot(spot)
-            enemy.weapon = weapon()
-            enemy.weapon.type = "knife"
-            enemy.weapon.accuracy = 0.9
-            enemy.weapon.damage = 3
+            enemy.weapon = knife()
             enemy.enemy = True
             self.participants.append(enemy)
         
@@ -243,8 +269,20 @@ class fight_scene(thing):
         self.shoot(char)
         self.next()
     def shoot(self,char):
+        p = char.pos
         tp = char.target.pos
-        if random.random()<char.weapon.accuracy:
+        d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
+        range = ""
+        if d<=char.weapon.close**2:
+            range = "_close"
+        if d>char.weapon.range**2:
+            range = "_far"
+        import math
+        print math.sqrt(d),range
+        if d>char.weapon.far**2:
+            self.children.append(popup_text("Miss",tp[:]))
+            return
+        if random.random()<getattr(char.weapon,"accuracy"+range):
             char.target.hp-=char.weapon.damage
             self.children.append(popup_text(str(char.weapon.damage),tp[:]))
             if char.target.hp<=0:
