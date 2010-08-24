@@ -226,7 +226,7 @@ class fight_scene(thing):
         for enemy in enemies:
             spot = choose_closest_to(enemy,[x for x in self.spots.values() if not x.contains])
             enemy = realchar().set_spot(spot)
-            enemy.weapon = knife()
+            enemy.weapon = gun()
             enemy.enemy = True
             self.participants.append(enemy)
         
@@ -300,7 +300,7 @@ class fight_scene(thing):
             self.next_mode -= dt
             if self.next_mode <= 0:
                 self.next()
-                self.next_mode = 1
+                self.next_mode = 0.25
         elif self.turn_start:
             self.turn_start = False
             p = nt
@@ -334,6 +334,13 @@ class fight_scene(thing):
                 options = char.spot.can_move()
                 if options:
                     char.set_spot(choose_closest_to(char.target,options))
+            else:
+                self.shoot(char)
+        elif char.weapon.type=="gun":
+            if not char.target:
+                p = self.players()
+                if p:
+                    char.target = p[0]
             else:
                 self.shoot(char)
         self.next()
