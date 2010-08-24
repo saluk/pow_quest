@@ -121,12 +121,14 @@ class sprite(thing):
     images = {}
     def __init__(self,img,pos):
         super(sprite,self).__init__()
+        self.load(img)
+        self.pos = pos
+        self.center = False
+    def load(self,img):
         if img not in self.images:
             self.images[img] = pygame.image.load(img).convert()
             self.images[img].set_colorkey([255,0,255])
         self.surf = self.images[img]
-        self.pos = pos
-        self.center = False
     def draw(self,surf):
         cp = self.pos[:]
         if self.center:
