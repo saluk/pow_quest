@@ -55,7 +55,7 @@ main_menu.edit_fight = edit_fight
 
 bgcolor = (215,196,146)
 def col(man,bg):
-    if bg.get_at([int(x) for x in man.pos])[:3] != bgcolor:
+    if bg.get_at([int(x) for x in man.pos])[:3] != bg.get_at([0,0])[:3]:
         return True
     return False
         
