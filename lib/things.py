@@ -160,6 +160,15 @@ class door(sprite):
         self.set_facing()
     def set_facing(self):
         super(door,self).__init__("art/%s_%s.png"%(self.tag,self.state),self.pos)
+    def mouse_click(self,pos,mode):
+        c = self
+        w,h = self.surf.get_size()
+        if pos[0]>=c.pos[0] and pos[0]<=c.pos[0]+w and pos[1]>=c.pos[1] and pos[1]<=c.pos[1]+h:
+            if self.state == "closed":
+                self.state = "open"
+            elif self.state == "open":
+                self.state = "closed"
+            self.set_facing()
         
 class menu(thing):
     def __init__(self,pos,width,options=None):

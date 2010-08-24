@@ -107,7 +107,7 @@ def col(man):
         p = man.pos
         r,ss = s.region()
         if p[0]>=r[0] and p[0]<=r[0]+ss[0] and p[1]>=r[1] and p[1]<=r[1]+ss[1]:
-            if s.data.get("destination",None):
+            if s.data.get("destination",None) and s.state=="open":
                 load_scene(s.data["destination"]["scene"],man)
                 man.pos = s.data["destination"]["pos"][:]
                 return False
