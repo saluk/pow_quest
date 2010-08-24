@@ -135,6 +135,13 @@ class sprite(thing):
             cp[0]-=self.surf.get_width()//2
             cp[1]-=self.surf.get_height()//2
         surf.blit(self.surf,cp)
+    def region(self):
+        cp = self.pos[:]
+        s = self.surf.get_size()
+        if self.center:
+            cp[0]-=s[0]//2
+            cp[1]-=s[1]//2
+        return cp,s
         
 class char(sprite):
     def __init__(self,tag,pos,facing="s"):

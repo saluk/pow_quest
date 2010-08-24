@@ -89,13 +89,20 @@ for o in eval(open("data/objects.txt").read()):
 bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
 
-man = char("army",[160,100])
+man = char("army",[160,140])
 load_scene("jail",man)
 scene.sprites.children.append(man)
 
 
 bgcolor = (215,196,146)
 def col(man):
+    for s in pygame.scene.sprites.children:
+        if s == man:
+            continue
+        p = man.pos
+        r,s = s.region()
+        if p[0]>=r[0] and p[0]<=r[0]+s[0] and p[1]>=r[1] and p[1]<=r[1]+s[1]:
+            return True
     for region in pygame.cur_scene["regions"]:
         if man.pos[0]>=region[0] and man.pos[0]<=region[0]+region[2] and man.pos[1]>=region[1] and man.pos[1]<=region[1]+region[3]:
             r = pygame.cur_scene["regions"][region]
