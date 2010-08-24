@@ -180,6 +180,8 @@ class menu(thing):
     def mouse_click(self,pos,mode):
         for c in self.children:
             if pos[0]>=c.pos[0] and pos[0]<=c.pos[0]+c.width and pos[1]>=c.pos[1] and pos[1]<=c.pos[1]+10:
-                command = c.lines[0]
-                getattr(self,command.replace(" ","_").lower())()
+                self.execute(c)
                 return True
+    def execute(self,option):
+        command = option.lines[0]
+        getattr(self,command.replace(" ","_").lower())()

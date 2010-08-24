@@ -1,10 +1,14 @@
 import pygame
+import os
 pygame.scrap.init()
 from things import *
 
 class point_add(thing):
     def mouse_click(self,pos,mode):
-        self.parent.points.append(pos)
+        if pos in self.parent.points:
+            self.parent.points.remove(pos)
+        else:
+            self.parent.points.append(pos)
         
 class point_connect(thing):
     def __init__(self):
@@ -25,9 +29,18 @@ class point_connect(thing):
                     return True
         return True
 
+class file_menu(menu):
+    def update(self,dt):
+        self.options = os.listdir(self.dir)
+        super(file_menu,self).update(dt)
+    def execute(self,option):
+        command = option.lines[0]
+        self.parent.bg.load("art/"+command)
+        self.kill = 1
+
 class edit_menu(menu):
     def update(self,dt):
-        self.options = ["save","add point","connect points"]
+        self.options = ["save","add point","connect points","clear","bg"]
         super(edit_menu,self).update(dt)
     def add_point(self):
         pa = point_add()
@@ -39,9 +52,18 @@ class edit_menu(menu):
         self.parent.interface.children = [pc]
     def save(self):
         self.parent.save()
+    def bg(self):
+        fm = file_menu([0,0],150)
+        fm.dir = "art"
+        fm.parent = self.parent
+        self.parent.children.append(fm)
+    def clear(self):
+        self.parent.points = []
+        self.parent.connections = []
 
 class edit(thing):
     def __init__(self,children):
+        super(edit,self).__init__()
         self.old_children = children
         self.bg = sprite("art/bunker.png",[0,0])
         self.children = [self.bg]
@@ -54,7 +76,10 @@ class edit(thing):
             self.em.kill = 0
         self.interface = thing()
         self.children.insert(0,self.interface)
-        self.load(pygame.scrap.get(pygame.SCRAP_TEXT))
+        try:
+            self.load(pygame.scrap.get(pygame.SCRAP_TEXT))
+        except:
+            pass
     def load(self,text):
         points,connections = text.split("\n")
         self.points = eval(points)
