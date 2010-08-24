@@ -18,15 +18,27 @@ pygame.timer = pygame.time.Clock()
 
 scene = thing()
 pygame.scene = scene
+
+def load_scene(scene_name,char):
+    scene = pygame.cur_scene = pygame.scene_data[scene_name]
+    pygame.scene.children = []
+    pygame.bg = sprite("art/"+scene["map"]+".png",[0,0])
+    pygame.scene.children.append(pygame.bg)
+    pygame.scene.sprites = thing()
+    pygame.scene.sprites.sort_mode = "y"
+    pygame.scene.children.append(pygame.scene.sprites)
+    pygame.scene.sprites.children.append(char)
+    
+
+f = open("data/scenes.txt")
+pygame.scene_data = eval(f.read())
+
 bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
-scene.children.append(textbox_chain("50,50,150,2;This is a test of speech. \n\
-It should wrap at the right time, and go on and on and on. \
-Just a basic textbox module really.;0,0,150,2;This is another textbox.;"))
+
 man = char("army",[160,100])
-scene.sprites = thing()
-scene.sprites.sort_mode = "y"
-scene.children.append(scene.sprites)
+load_scene("start",man)
+
 enemies = []
 for x in range(5):
     enemy_man = char("army",[random.randint(40,240),random.randint(40,240)])
@@ -54,7 +66,15 @@ main_menu.edit_fight = edit_fight
 
 
 bgcolor = (215,196,146)
-def col(man,bg):
+def col(man):
+    for region in pygame.cur_scene["regions"]:
+        if man.pos[0]>=region[0] and man.pos[0]<=region[0]+region[2] and man.pos[1]>=region[1] and man.pos[1]<=region[1]+region[3]:
+            r = pygame.cur_scene["regions"][region]
+            if r["type"] == "warp":
+                load_scene(r["scene"],man)
+                man.pos = r["spot"]
+                return False
+    bg = pygame.bg.surf
     if bg.get_at([int(x) for x in man.pos])[:3] != bg.get_at([0,0])[:3]:
         return True
     return False
@@ -89,11 +109,11 @@ while running:
     op = man.pos[:]
     def vert(man,amt):
         man.pos[1]+=amt*dt
-        if col(man,bunker.surf):
+        if col(man):
             man.pos[1]-=amt*dt
     def horiz(man,amt):
         man.pos[0]+=amt*dt
-        if col(man,bunker.surf):
+        if col(man):
             man.pos[0]-=amt*dt
     if keys[pygame.K_RIGHT]:
         man.set_facing("e")

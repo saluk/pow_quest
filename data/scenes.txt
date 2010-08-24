@@ -1,0 +1,10 @@
+{
+    "start":{
+        "map":"bunker",
+        "regions":{(155,34,46,21):{"type":"warp","scene":"jail","spot":[161,145]}}
+    },
+    "jail":{
+        "map":"t-junction",
+        "regions":{(128,156,70,14):{"type":"warp","scene":"start","spot":[175,60]}}
+    },
+}
