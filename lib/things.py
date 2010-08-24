@@ -152,6 +152,15 @@ class char(sprite):
         super(char,self).__init__("art/%s_%s_idle.png"%(self.tag,facing),self.pos)
         self.center = True
         
+class door(sprite):
+    def __init__(self,tag,pos,state="closed"):
+        self.tag = tag
+        self.pos = pos
+        self.state = state
+        self.set_facing()
+    def set_facing(self):
+        super(door,self).__init__("art/%s_%s.png"%(self.tag,self.state),self.pos)
+        
 class menu(thing):
     def __init__(self,pos,width,options=None):
         super(menu,self).__init__()

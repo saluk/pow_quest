@@ -83,7 +83,10 @@ for o in eval(open("data/objects.txt").read()):
     if o["type"] == "enemy":
         ob = char("army",pos)
         ob.is_enemy = True
+    if o["type"] == "door":
+        ob = door("door1",pos,"closed")
     if ob:
+        ob.data = o
         obs = pygame.scene_data[o["scene"]].get("obs",[])
         obs.append(ob)
         pygame.scene_data[o["scene"]]["obs"] = obs
@@ -102,16 +105,13 @@ def col(man):
         if s == man:
             continue
         p = man.pos
-        r,s = s.region()
-        if p[0]>=r[0] and p[0]<=r[0]+s[0] and p[1]>=r[1] and p[1]<=r[1]+s[1]:
-            return True
-    for region in pygame.cur_scene["regions"]:
-        if man.pos[0]>=region[0] and man.pos[0]<=region[0]+region[2] and man.pos[1]>=region[1] and man.pos[1]<=region[1]+region[3]:
-            r = pygame.cur_scene["regions"][region]
-            if r["type"] == "warp":
-                load_scene(r["scene"],man)
-                man.pos = r["spot"][:]
+        r,ss = s.region()
+        if p[0]>=r[0] and p[0]<=r[0]+ss[0] and p[1]>=r[1] and p[1]<=r[1]+ss[1]:
+            if s.data.get("destination",None):
+                load_scene(s.data["destination"]["scene"],man)
+                man.pos = s.data["destination"]["pos"][:]
                 return False
+            return True
     bg = pygame.bg.surf
     try:
         if bg.get_at([int(x) for x in man.pos])[:3] != bg.get_at([0,0])[:3]:

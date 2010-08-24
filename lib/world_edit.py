@@ -37,12 +37,15 @@ class place_menu(thing):
 class add_menu(menu):
     def __init__(self):
         super(add_menu,self).__init__([50,0],150)
-        self.options = ["enemy"]
+        self.options = ["enemy","door"]
     def execute(self,option):
         command = option.lines[0]
         if command == "enemy":
             ob = game_object("army",[0,0])
+        if command == "door":
+            ob = game_door("door1",[0,0])
         ob.data = {"type":command,"scene":self.parent.scene_name,"pos":"random"}
+        ob.parent = self.parent
         pm = place_menu(ob)
         pm.parent = self.parent
         self.parent.interface.children = [pm]
@@ -110,6 +113,15 @@ class game_object(char):
             self.parent.children.append(om)
             return True
 
+class game_door(door):
+    def mouse_click(self,pos,mode):
+        if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+self.surf.get_width() and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+self.surf.get_height():
+            om = object_menu(pos,50)
+            om.parent = self.parent
+            om.char = self
+            self.parent.children.append(om)
+            return True
+
 class edit(thing):
     def __init__(self,children,scene_name):
         super(edit,self).__init__()
@@ -136,6 +148,8 @@ class edit(thing):
                 pos = o["pos"]
             if o["type"] == "enemy":
                 ob = game_object("army",pos)
+            if o["type"] == "door":
+                ob = game_door("door1",pos)
             if ob:
                 ob.parent = self
                 ob.data = o
