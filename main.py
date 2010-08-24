@@ -18,12 +18,12 @@ pygame.timer = pygame.time.Clock()
 
 scene = thing()
 pygame.scene = scene
-bunker = sprite("art/bunker.png",[0,0])
+bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
 scene.children.append(textbox_chain("50,50,150,2;This is a test of speech. \n\
 It should wrap at the right time, and go on and on and on. \
 Just a basic textbox module really.;0,0,150,2;This is another textbox.;"))
-man = char("army",[100,100])
+man = char("army",[160,100])
 scene.sprites = thing()
 scene.sprites.sort_mode = "y"
 scene.children.append(scene.sprites)
