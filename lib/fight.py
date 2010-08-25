@@ -1,7 +1,57 @@
 import pygame
 import random
+import math
 import sys
+import geometry
 from things import *
+
+
+"""
+Aiming.
+hit region:
+    defines range of angles that are picked at random for a shot
+    also at a wide angle shots have a chance to miss even if the line of sight actually hits (based on how far off true angle)
+Each time target is changed
+    hit region defined by base aim skill for character and weapon
+    each time aim is picked, hit region narrows based on character aim speed skill and weapon
+    hit region has a minimum narrow defined by character and weapon aim stats
+When changing targets, hit region expands but not all the way
+when hit, hit region expands based on focus statistic
+"""
+class hit_region(thing):
+    def __init__(self):
+        super(hit_region,self).__init__()
+        self.start_pos = [0,0]
+        self.target_pos = [100,100]
+        self.target_angle = 60
+        self.half_width = 10  #half the angle width
+    def get_angle(self):
+        """Pick a random firing angle based on our width. Distribution should be somewhat normal,
+        center angle should be more common than edges."""
+        mean = self.target_angle
+        std_dev = self.half_width/3.0
+        ang = random.gauss(mean,std_dev)
+        return ang
+    def update_stats(self):
+        rise = self.target_pos[0]-self.start_pos[0]
+        run = self.target_pos[1]-self.start_pos[1]
+        ang = math.atan2(run,rise)
+        self.target_angle = ang*180.0/math.pi
+
+def line_box(line,box):
+    x,y = box[0]
+    w,h = box[1]
+    line1 = [x,y],[x+w,y]
+    line2 = [x+w,y],[x+w,y+h]
+    line3 = [x,y+h],[x+w,y+h]
+    line4 = [x,y],[x,y+h]
+    for bline in [line1,line2,line3,line4]:
+        if geometry.calculateIntersectPoint(line[0],line[1],bline[0],bline[1]):
+            return True
+        
+hr = hit_region()
+hr.update_stats()
+print hr.get_angle()
 
 class spot(thing):
     """A spot someone can be placed in on the fight screen"""
