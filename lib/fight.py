@@ -124,8 +124,9 @@ class action_menu(menu):
     def init_options(self):
         character = self.character
         if character.weapon:
-            self.options.append("aim")
+            self.options.append("target")
             if character.target:
+                self.options.append("aim")
                 if character.weapon.type == "gun":
                     self.options.append("shoot")
                 if character.weapon.type == "knife":
@@ -136,8 +137,8 @@ class action_menu(menu):
         self.options.append("idle")
     def move(self):
         pygame.fight_scene.move_menu(self.character)
-    def aim(self):
-        pygame.fight_scene.aim_menu(self.character)
+    def target(self):
+        pygame.fight_scene.target_menu(self.character)
     def shoot(self):
         pygame.fight_scene.shoot_menu(self.character)
 
@@ -165,9 +166,9 @@ class move_menu(thing):
                 pygame.fight_scene.next()
                 return True
                 
-class aim_menu(thing):
+class target_menu(thing):
     def __init__(self,char,chars):
-        super(aim_menu,self).__init__()
+        super(target_menu,self).__init__()
         self.children = []
         self.char = char
         self.chars = chars
@@ -185,7 +186,9 @@ class aim_menu(thing):
             cw=ch=20
             if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
                 self.char.target = s
-                pygame.fight_scene.next()
+                #pygame.fight_scene.next()
+                pygame.fight_scene.action_menu(self.char)
+                self.kill = 1
                 return True
                 
 def choose_closest_to(ob,spots):
@@ -262,8 +265,8 @@ class fight_scene(thing):
         self.menus.children = [action_menu(char)]
     def move_menu(self,char):
         self.menus.children = [move_menu(char)]
-    def aim_menu(self,char):
-        self.menus.children = [aim_menu(char,self.participants)]
+    def target_menu(self,char):
+        self.menus.children = [target_menu(char,self.participants)]
     def shoot_menu(self,char):
         self.menus.children = []
         self.shoot(char)
