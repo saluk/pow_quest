@@ -19,24 +19,37 @@ When changing targets, hit region expands but not all the way
 when hit, hit region expands based on focus statistic
 """
 class hit_region(thing):
-    def __init__(self):
+    def __init__(self,start=[0,0],end=[100,100],band=30,range=300):
         super(hit_region,self).__init__()
-        self.start_pos = [0,0]
-        self.target_pos = [100,100]
+        self.start_pos = start
+        self.target_pos = end
         self.target_angle = 60
-        self.half_width = 10  #half the angle width
+        self.range = range
+        self.half_width = band//2  #half the angle width
+        self.update_stats()
     def get_angle(self):
         """Pick a random firing angle based on our width. Distribution should be somewhat normal,
         center angle should be more common than edges."""
         mean = self.target_angle
         std_dev = self.half_width/3.0
         ang = random.gauss(mean,std_dev)
+        print ang,mean
         return ang
+    def random_line(self):
+        """Pick a random firing angle based on our width. Distribution should be somewhat normal,
+        center angle should be more common than edges."""
+        ang = self.get_angle()
+        length = self.range
+        x = length*math.cos(ang*math.pi/180.0)
+        y = length*math.sin(ang*math.pi/180.0)
+        return [self.start_pos,[self.start_pos[0]+x,self.start_pos[1]+y]]
     def update_stats(self):
         rise = self.target_pos[0]-self.start_pos[0]
         run = self.target_pos[1]-self.start_pos[1]
         ang = math.atan2(run,rise)
         self.target_angle = ang*180.0/math.pi
+        while self.target_angle<0:
+            self.target_angle += 360
 
 def line_box(line,box):
     x,y = box[0]
@@ -52,6 +65,7 @@ def line_box(line,box):
 hr = hit_region()
 hr.update_stats()
 print hr.get_angle()
+print hr.random_line()
 
 class spot(thing):
     """A spot someone can be placed in on the fight screen"""
@@ -255,6 +269,8 @@ def choose_closest_to(ob,spots):
         
 class fight_scene(thing):
     def __init__(self,restore_children,goodies,enemies,bg,fight):
+        self._debug_line = None
+        
         super(fight_scene,self).__init__()
         pygame.fight_scene = self
         self.restore_children = restore_children
@@ -287,6 +303,9 @@ class fight_scene(thing):
         self.children.append(self.menus)
         self.turns = ["wait"]
         self.calc_turns()
+    def draw(self,surf):
+        if self._debug_line:
+            pygame.draw.line(surf,[255,0,0],*self._debug_line)
     def load_spots_from_file(self,file):
         self.spots = {}
         points,connections = open(file).read().split("\n")
@@ -332,6 +351,8 @@ class fight_scene(thing):
         target = None
         tp = char.target.pos
         i = 0
+        shoot_path = hit_region(start=char.pos,end=tp,band=30).random_line()
+        self._debug_line = shoot_path
         for part in sorted(self.participants,key=lambda x: x.dist):
             if part == char:
                 continue
@@ -341,7 +362,7 @@ class fight_scene(thing):
             x = part.pos[0]-w//2
             y = part.pos[1]-h//2
             print [p,char.target.pos],[[x,y],[w,h]]
-            if line_box([p,char.target.pos],[[x,y],[w,h]]):
+            if line_box(shoot_path,[[x,y],[w,h]]):
                 target = part
                 print "found target"
                 break
