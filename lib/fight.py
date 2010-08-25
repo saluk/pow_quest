@@ -330,18 +330,25 @@ class fight_scene(thing):
             part.dist = d
         #Iterate through participants in order of distance until we hit it
         target = None
+        tp = char.target.pos
+        i = 0
         for part in sorted(self.participants,key=lambda x: x.dist):
-            w,h = [15,20]
+            if part == char:
+                continue
+            self.children.append(textbox("%s"%i,part.pos))
+            i+=1
+            w,h = [10,10]
             x = part.pos[0]-w//2
             y = part.pos[1]-h//2
-            if line_box([p,part.pos],[[x,y],[w,h]]):
+            print [p,char.target.pos],[[x,y],[w,h]]
+            if line_box([p,char.target.pos],[[x,y],[w,h]]):
                 target = part
+                print "found target"
                 break
-        tp = target.pos
         if not target or target.dist>char.weapon.far**2:
-            print target.dist,char.weapon.far
             self.children.append(popup_text("Miss",tp[:]))
             return
+        tp = target.pos
         target.hp-=char.weapon.damage
         self.children.append(popup_text(str(char.weapon.damage),tp[:]))
         if target.hp<=0:
@@ -382,22 +389,22 @@ class fight_scene(thing):
     def players(self):
         return [x for x in self.participants if not x.enemy]
     def ai(self,char):
-        if char.weapon.type=="knife":
-            if not char.target:
-                p = self.players()
-                if p:
-                    char.target = p[0]
-            elif char.target not in char.spot.near():
-                options = char.spot.can_move()
-                if options:
-                    char.set_spot(choose_closest_to(char.target,options))
-            else:
-                self.shoot(char)
-        elif char.weapon.type=="gun":
-            if not char.target:
-                p = self.players()
-                if p:
-                    char.target = p[0]
-            else:
-                self.shoot(char)
+        #~ if char.weapon.type=="knife":
+            #~ if not char.target:
+                #~ p = self.players()
+                #~ if p:
+                    #~ char.target = p[0]
+            #~ elif char.target not in char.spot.near():
+                #~ options = char.spot.can_move()
+                #~ if options:
+                    #~ char.set_spot(choose_closest_to(char.target,options))
+            #~ else:
+                #~ self.shoot(char)
+        #~ elif char.weapon.type=="gun":
+            #~ if not char.target:
+                #~ p = self.players()
+                #~ if p:
+                    #~ char.target = p[0]
+            #~ else:
+                #~ self.shoot(char)
         self.next()
