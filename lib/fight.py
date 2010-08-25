@@ -323,27 +323,31 @@ class fight_scene(thing):
         self.next()
     def shoot(self,char):
         p = char.pos
-        tp = char.target.pos
-        d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
-        range = ""
-        if d<=char.weapon.close**2:
-            range = "_close"
-        if d>char.weapon.range**2:
-            range = "_far"
-        import math
-        print math.sqrt(d),range
-        if d>char.weapon.far**2:
+        #Sort participants by range
+        for part in self.participants:
+            tp = part.pos
+            d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
+            part.dist = d
+        #Iterate through participants in order of distance until we hit it
+        target = None
+        for part in sorted(self.participants,key=lambda x: x.dist):
+            w,h = [15,20]
+            x = part.pos[0]-w//2
+            y = part.pos[1]-h//2
+            if line_box([p,part.pos],[[x,y],[w,h]]):
+                target = part
+                break
+        tp = target.pos
+        if not target or target.dist>char.weapon.far**2:
+            print target.dist,char.weapon.far
             self.children.append(popup_text("Miss",tp[:]))
             return
-        if random.random()<getattr(char.weapon,"accuracy"+range):
-            char.target.hp-=char.weapon.damage
-            self.children.append(popup_text(str(char.weapon.damage),tp[:]))
-            if char.target.hp<=0:
-                char.target.set_spot(None)
-                self.participants.remove(char.target)
-                self.clear_targets()
-        else:
-            self.children.append(popup_text("Miss",tp[:]))
+        target.hp-=char.weapon.damage
+        self.children.append(popup_text(str(char.weapon.damage),tp[:]))
+        if target.hp<=0:
+            target.set_spot(None)
+            self.participants.remove(target)
+            self.clear_targets()
     def update(self,dt):
         "Update timers if no interface is up"
         nt = self.turns[0]
