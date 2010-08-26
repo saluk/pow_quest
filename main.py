@@ -68,7 +68,7 @@ def load_scene(scene_name,char):
             
     #~ if pygame.scene.enemies:
         #~ pygame.scene.children = [fight_scene(pygame.scene.children,[man],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"])]
-    pygame.scene.children.append(inventory_menu(man.inventory,[0,184]))
+    pygame.scene.children.append(inventory_menu(man,[0,184]))
     debug_menu()
 
 f = open("data/scenes.txt")

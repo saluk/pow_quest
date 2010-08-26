@@ -338,7 +338,7 @@ class fight_scene(thing):
         for good in goodies:
             spot = choose_closest_to(good,[x for x in self.spots.values() if not x.contains])
             player = realchar().set_spot(spot)
-            player.weapon = gun()
+            player.weapon = gun(good.weapon)
             player.sprite.set_facing("n")
             self.participants = [player]
         

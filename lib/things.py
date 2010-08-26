@@ -166,6 +166,7 @@ class char(sprite):
         self.tag = tag
         self.pos = pos
         self.set_facing(facing)
+        self.weapon = None
         self.actions = ["talk"]
     def set_facing(self,facing):
         super(char,self).__init__("art/%s_%s_idle.png"%(self.tag,facing),self.pos)
@@ -209,25 +210,31 @@ class door(sprite):
             self.set_facing()
             
 class item(sprite):
-    pass
+    def __init__(self,tag,pos,char):
+        super(item,self).__init__("art/"+tag+".png",pos)
+        self.tag = tag
+        self.char = char
+    def mouse_click(self,pos,mode):
+        if self.tag == "smg":
+            self.char.weapon = {"type":"gun","damage":15,"accuracy":0,"reaction":0,"range":150}
             
 class inventory_menu(thing):
-    def __init__(self,invlist,pos):
+    def __init__(self,char,pos):
         super(inventory_menu,self).__init__()
         self.pos = pos
-        self.invlist = invlist
+        self.char = char
         self.last_invlist = []
     def update(self,dt):
-        if self.invlist != self.last_invlist:
+        if self.char.inventory != self.last_invlist:
             self.children = []
             x,y = self.pos
-            for o in self.invlist:
-                self.children.append(item("art/"+o+".png",[x,y+3]))
+            for o in self.char.inventory:
+                self.children.append(item(o,[x,y+3],self.char))
                 x+=14
-            self.last_invlist = self.invlist[:]
+            self.last_invlist = self.char.inventory[:]
     def predraw(self,surf):
         bgcol = [0,0,0]
-        pygame.draw.rect(surf,bgcol,[self.pos,[14*len(self.invlist),16]])
+        pygame.draw.rect(surf,bgcol,[self.pos,[14*len(self.char.inventory),16]])
         
 class menu(thing):
     def __init__(self,pos,width,options=None):
