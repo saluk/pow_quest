@@ -18,6 +18,14 @@ Each time target is changed
 When changing targets, hit region expands but not all the way
 when hit, hit region expands based on focus statistic
 """
+def rad(x):
+    return x*math.pi/180.0
+def deg(x):
+    return x*180.0*math.pi
+def make_line(point,ang,length):
+    x = length*math.cos(ang*math.pi/180.0)
+    y = length*math.sin(ang*math.pi/180.0)
+    return [point,[point[0]+x,point[1]+y]]
 class hit_region(thing):
     def __init__(self,start=[0,0],end=[100,100],band=30,range=300):
         super(hit_region,self).__init__()
@@ -40,9 +48,7 @@ class hit_region(thing):
         center angle should be more common than edges."""
         ang = self.get_angle()
         length = self.range
-        x = length*math.cos(ang*math.pi/180.0)
-        y = length*math.sin(ang*math.pi/180.0)
-        return [self.start_pos,[self.start_pos[0]+x,self.start_pos[1]+y]]
+        return make_line(self.start_pos,ang,length)
     def update_stats(self):
         rise = self.target_pos[0]-self.start_pos[0]
         run = self.target_pos[1]-self.start_pos[1]
@@ -50,7 +56,16 @@ class hit_region(thing):
         self.target_angle = ang*180.0/math.pi
         while self.target_angle<0:
             self.target_angle += 360
-
+    def draw(self,surf):
+        center = self.start_pos[:]
+        left_ang = self.target_angle-self.half_width
+        right_ang = self.target_angle+self.half_width
+        l1 = make_line(self.start_pos,left_ang,self.range)
+        l2 = make_line(self.start_pos,right_ang,self.range)
+        l3 = make_line(self.start_pos,self.target_angle,self.range)
+        for l in [l1,l2,l3]:
+            pygame.draw.line(surf,[0,255,0],*l)
+        
 def line_box(line,box):
     x,y = box[0]
     w,h = box[1]
@@ -351,7 +366,9 @@ class fight_scene(thing):
         target = None
         tp = char.target.pos
         i = 0
-        shoot_path = hit_region(start=char.pos,end=tp,band=30).random_line()
+        hr = hit_region(start=char.pos,end=tp,band=30)
+        self.children.append(hr)
+        shoot_path = hr.random_line()
         self._debug_line = shoot_path
         for part in sorted(self.participants,key=lambda x: x.dist):
             if part == char:
