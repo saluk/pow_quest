@@ -34,6 +34,8 @@ class hit_region(thing):
         self.target_angle = 60
         self.range = range
         self.half_width = band//2  #half the angle width
+        self.min_half_width = 5
+        self.shrink_rate = 5
         self.update_stats()
     def get_angle(self):
         """Pick a random firing angle based on our width. Distribution should be somewhat normal,
@@ -56,6 +58,10 @@ class hit_region(thing):
         self.target_angle = ang*180.0/math.pi
         while self.target_angle<0:
             self.target_angle += 360
+    def shrink(self):
+        self.half_width -= self.shrink_rate
+        if self.half_width < self.min_half_width:
+            self.half_width = self.min_half_width
     def draw(self,surf):
         center = self.start_pos[:]
         left_ang = self.target_angle-self.half_width
@@ -227,6 +233,9 @@ class action_menu(menu):
         pygame.fight_scene.target_menu(self.character)
     def shoot(self):
         pygame.fight_scene.shoot_menu(self.character)
+    def aim(self):
+        self.character.hit_region.shrink()
+        pygame.fight_scene.next()
 
 class move_menu(thing):
     def __init__(self,char):
