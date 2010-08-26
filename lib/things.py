@@ -26,6 +26,10 @@ class thing(object):
         for c in reversed(self.children):
             if c.mouse_click(pos,mode):
                 return True
+    def keypress(self,text):
+        for c in reversed(self.children):
+            if c.keypress(text):
+                return True
 
 class textbox(thing):
     def __init__(self,text,pos,width=150):
@@ -73,6 +77,16 @@ class quick_textbox(textbox):
     def update(self,dt):
         while self.to_print:
             super(quick_textbox,self).update(5)
+            
+class entry_box(quick_textbox):
+    def keypress(self,text):
+        if text == "backspace":
+            self.lines[0] = self.lines[0][:-1]
+            return
+        try:
+            self.lines[0]+=chr(ord(text[0]))
+        except:
+            pass
             
 class popup_text(quick_textbox):
     direction = -1

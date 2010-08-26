@@ -98,6 +98,8 @@ man = char("army",[160,140])
 load_scene("jail",man)
 scene.sprites.children.append(man)
 
+scene.children.append(entry_box(">",[160,140]))
+
 
 bgcolor = (215,196,146)
 def col(man):
@@ -145,6 +147,12 @@ while running:
             sc = 320.0/res[0],200.0/res[1]
             p = [int(e.pos[0]*sc[0]),int(e.pos[1]*sc[1])]
             game.mouse_click(p)
+        if e.type==pygame.KEYDOWN:
+            if e.key==pygame.K_BACKSPACE:
+                game.keypress("backspace")
+            else:
+                game.keypress(e.unicode)
+
     keys = pygame.key.get_pressed()
     speed = 40
     
