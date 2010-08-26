@@ -226,4 +226,5 @@ class menu(thing):
             command = option.lines[0]
             getattr(self,command.replace(" ","_").lower())()
         except:
-            pass
+            import traceback
+            traceback.print_exc()

@@ -399,7 +399,6 @@ class fight_scene(thing):
         for part in sorted(self.participants,key=lambda x: x.dist):
             if part == char:
                 continue
-            self.children.append(textbox("%s"%i,part.pos))
             i+=1
             w,h = [10,10]
             x = part.pos[0]-w//2
@@ -411,6 +410,15 @@ class fight_scene(thing):
                 break
         if not target or target.dist>char.hit_region.range**2:
             self.children.append(popup_text("Miss",tp[:]))
+            return
+        angle = hit_region(char.pos,target.pos).target_angle
+        width = char.hit_region.half_width
+        print width
+        diff = abs(char.hit_region.target_angle-angle)+width/3.0
+        print diff
+        r = abs(random.randint(int(angle-diff),int(angle+diff))-angle)
+        if r>10:
+            self.children.append(popup_text("Near miss",target.pos[:]))
             return
         damage = char.weapon.stats["damage"]
         tp = target.pos
