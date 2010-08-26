@@ -231,7 +231,6 @@ class action_menu(menu):
                         self.options.append("slice")
         if character.spot.can_move():
             self.options.append("move")
-        self.options.append("idle")
         self.options.append("inacurate gun")
         self.options.append("accurate gun")
     def move(self):
@@ -413,9 +412,10 @@ class fight_scene(thing):
         if not target or target.dist>char.hit_region.range**2:
             self.children.append(popup_text("Miss",tp[:]))
             return
+        damage = char.weapon.stats["damage"]
         tp = target.pos
-        target.hp-=char.weapon.stats["damage"]
-        self.children.append(popup_text(str(char.weapon.damage),tp[:]))
+        target.hp-=damage
+        self.children.append(popup_text(str(damage),tp[:]))
         if target.hp<=0:
             target.set_spot(None)
             self.participants.remove(target)

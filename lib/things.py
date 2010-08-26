@@ -222,5 +222,8 @@ class menu(thing):
                 self.execute(c)
                 return True
     def execute(self,option):
-        command = option.lines[0]
-        getattr(self,command.replace(" ","_").lower())()
+        try:
+            command = option.lines[0]
+            getattr(self,command.replace(" ","_").lower())()
+        except:
+            pass
