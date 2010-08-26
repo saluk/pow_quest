@@ -164,16 +164,25 @@ class realchar(thing):
             self.children = [self.sprite]
             self.pos = self.sprite.pos = self.spot.pos
         return self
+    def reset_hit_region(self):
+        self.hit_region.start_pos = self.pos[:]
+        if self.target:
+            self.hit_region.target_pos = self.target.pos[:]
+        self.hit_region.half_width = 90-self.get_stat("accuracy")*10
+        self.hit_region.update_stats()
     def choose_target(self,char):
         self.target = char
-        self.hit_region.start_pos = self.pos[:]
-        self.hit_region.target_pos = char.pos[:]
-        self.hit_region.half_width = 90-self.stats["accuracy"]*10
-        self.hit_region.update_stats()
+        self.reset_hit_region()
     def aim(self):
-        self.hit_region.shrink_rate = self.stats["reaction"]*5
-        self.hit_region.min_half_width = 60-self.stats["accuracy"]*10
+        self.hit_region.shrink_rate = self.get_stat("reaction")*5
+        self.hit_region.min_half_width = 60-self.get_stat("accuracy")*10
         self.hit_region.shrink()
+    def get_stat(self,key):
+        """Gets a stat, including modifications"""
+        s = self.stats[key]
+        if self.weapon and key in self.weapon.stats:
+            s+=self.weapon.stats[key]
+        return s
     #~ def mouse_click(self,pos,mode):
         #~ if not self.children:
             #~ return
@@ -184,41 +193,22 @@ class realchar(thing):
             #~ pygame.scene.children[0].action_menu(self)
         
 class weapon(thing):
-    def __init__(self):
+    def __init__(self,stats=None):
         super(weapon,self).__init__()
         self.set_stats()
+        if stats:
+            self.stats.update(stats)
     def set_stats(self):
-        self.type = "gun"
-        self.damage = 10
-        self.far = 100
-        self.range = 50
-        self.close = 20
-        self.accuracy_close = 0.7
-        self.accuracy = 0.5
-        self.accuracy_far = 0.2
+        """Stats that match player stats are added to that stat"""
+        self.stats = {"type":"gun","damage":10,"accuracy":0,"reaction":0}
 
 class gun(weapon):
     def set_stats(self):
-        self.type = "gun"
-        self.damage = 10
-        self.far = 200
-        self.range = 150
-        self.close = 50
-        self.accuracy_close = 0.7
-        self.accuracy = 0.5
-        self.accuracy_far = 0.2
+        self.stats = {"type":"gun","damage":10,"accuracy":-1}
         
 class knife(weapon):
     def set_stats(self):
-        self.type = "knife"
-        self.damage = 3
-        #Knife types can only attack from one space over anyway
-        self.far = 150
-        self.range = 150
-        self.close = 150
-        self.accuracy_close = 0.9
-        self.accuracy = 0.9
-        self.accuracy_far = 0.9
+        self.stats = {"type":"knife","damage":3,"accuracy":100}
 
 class action_menu(menu):
     """The fighting menu for a person"""
@@ -234,14 +224,16 @@ class action_menu(menu):
             self.options.append("target")
             if character.target:
                 self.options.append("aim")
-                if character.weapon.type == "gun":
+                if character.weapon.stats["type"] == "gun":
                     self.options.append("shoot")
-                if character.weapon.type == "knife":
+                if character.weapon.stats["type"] == "knife":
                     if character.spot.near_enemy():
                         self.options.append("slice")
         if character.spot.can_move():
             self.options.append("move")
         self.options.append("idle")
+        self.options.append("inacurate gun")
+        self.options.append("accurate gun")
     def move(self):
         pygame.fight_scene.move_menu(self.character)
     def target(self):
@@ -251,6 +243,12 @@ class action_menu(menu):
     def aim(self):
         self.character.aim()
         pygame.fight_scene.next()
+    def inacurate_gun(self):
+        self.character.weapon = gun({"accuracy":-2})
+        self.character.reset_hit_region()
+    def accurate_gun(self):
+        self.character.weapon = gun({"accuracy":2})
+        self.character.reset_hit_region()
 
 class move_menu(thing):
     def __init__(self,char):
@@ -412,11 +410,11 @@ class fight_scene(thing):
                 target = part
                 print "found target"
                 break
-        if not target or target.dist>char.weapon.far**2:
+        if not target or target.dist>char.hit_region.range**2:
             self.children.append(popup_text("Miss",tp[:]))
             return
         tp = target.pos
-        target.hp-=char.weapon.damage
+        target.hp-=char.weapon.stats["damage"]
         self.children.append(popup_text(str(char.weapon.damage),tp[:]))
         if target.hp<=0:
             target.set_spot(None)
@@ -431,7 +429,7 @@ class fight_scene(thing):
             self.next_mode -= dt
             if self.next_mode <= 0:
                 self.next()
-                self.next_mode = 0.25
+                self.next_mode = 0.01
         elif self.turn_start:
             self.turn_start = False
             p = nt
@@ -456,7 +454,7 @@ class fight_scene(thing):
     def players(self):
         return [x for x in self.participants if not x.enemy]
     def ai(self,char):
-        #~ if char.weapon.type=="knife":
+        #~ if char.weapon.stats["type"]=="knife":
             #~ if not char.target:
                 #~ p = self.players()
                 #~ if p:
@@ -467,7 +465,7 @@ class fight_scene(thing):
                     #~ char.set_spot(choose_closest_to(char.target,options))
             #~ else:
                 #~ self.shoot(char)
-        #~ elif char.weapon.type=="gun":
+        #~ elif char.weapon.stats["type"]=="gun":
             #~ if not char.target:
                 #~ p = self.players()
                 #~ if p:
