@@ -128,12 +128,14 @@ class realchar(thing):
         self.enemy = False
         self.action = None
         self.target = None
+        self.hit_region = hit_region(start=self.pos,end=self.pos,band=30)
     def draw(self,surf):
         self.health_bar.pos = [self.sprite.pos[0]+5,self.sprite.pos[1]+5]
         self.health_bar.lines = ["%s/30"%self.hp]
         self.health_bar.draw(surf)
         if self.target:
             pygame.draw.line(surf,[100,100,100],self.pos,self.target.pos)
+            self.hit_region.draw(surf)
     def set_spot(self,spot):
         if self.spot:
             self.spot.contains = None
@@ -146,6 +148,11 @@ class realchar(thing):
             self.children = [self.sprite]
             self.pos = self.sprite.pos = self.spot.pos
         return self
+    def choose_target(self,char):
+        self.target = char
+        self.hit_region.start_pos = self.pos[:]
+        self.hit_region.target_pos = char.pos[:]
+        self.hit_region.update_stats()
     #~ def mouse_click(self,pos,mode):
         #~ if not self.children:
             #~ return
@@ -264,7 +271,7 @@ class target_menu(thing):
             cy = s.pos[1]-10
             cw=ch=20
             if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
-                self.char.target = s
+                self.char.choose_target(s)
                 #pygame.fight_scene.next()
                 pygame.fight_scene.action_menu(self.char)
                 self.kill = 1
@@ -366,9 +373,7 @@ class fight_scene(thing):
         target = None
         tp = char.target.pos
         i = 0
-        hr = hit_region(start=char.pos,end=tp,band=30)
-        self.children.append(hr)
-        shoot_path = hr.random_line()
+        shoot_path = char.hit_region.random_line()
         self._debug_line = shoot_path
         for part in sorted(self.participants,key=lambda x: x.dist):
             if part == char:
