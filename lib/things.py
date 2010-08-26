@@ -166,9 +166,25 @@ class char(sprite):
         self.tag = tag
         self.pos = pos
         self.set_facing(facing)
+        self.actions = ["talk"]
     def set_facing(self,facing):
         super(char,self).__init__("art/%s_%s_idle.png"%(self.tag,facing),self.pos)
         self.center = True
+        
+class player_char(char):
+    frob_range = 15
+    def draw(self,surf):
+        super(player_char,self).draw(surf)
+        for ob in pygame.scene.sprites.children:
+            if ob == self:
+                continue
+            if not hasattr(ob,"actions"):
+                continue
+            cp,s = ob.region()
+            center = cp[0]+s[0]//2,cp[1]+s[1]//2
+            size = max(s)
+            if (center[0]-self.pos[0])**2+(center[1]-self.pos[1])**2<self.frob_range**2:
+                pygame.draw.circle(surf,[0,0,0],center,size//2,1)
         
 class door(sprite):
     def __init__(self,tag,pos,state="closed"):
@@ -176,6 +192,7 @@ class door(sprite):
         self.pos = pos
         self.state = state
         self.set_facing()
+        self.actions = ["open","close"]
     def set_facing(self):
         super(door,self).__init__("art/%s_%s.png"%(self.tag,self.state),self.pos)
     def mouse_click(self,pos,mode):

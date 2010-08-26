@@ -94,7 +94,7 @@ for o in eval(open("data/objects.txt").read()):
 bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
 
-man = char("army",[160,140])
+man = player_char("army",[160,140])
 load_scene("jail",man)
 scene.sprites.children.append(man)
 
