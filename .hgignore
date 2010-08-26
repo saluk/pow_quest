@@ -1,2 +1,3 @@
 glob:other_games/*
 glob:*.pyc
+glob:art/screens/*
