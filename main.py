@@ -157,19 +157,19 @@ while running:
         man.pos[0]+=amt*dt
         if col(man):
             man.pos[0]-=amt*dt
-    if keys[pygame.K_RIGHT]:
+    if keys[pygame.K_d]:
         man.set_facing("e")
         horiz(man,speed)
         #vert(man,speed/3)
-    if keys[pygame.K_LEFT]:
+    if keys[pygame.K_a]:
         man.set_facing("w")
         horiz(man,-speed)
         #vert(man,-speed/3)
-    if keys[pygame.K_DOWN]:
+    if keys[pygame.K_s]:
         man.set_facing("s")
         vert(man,speed)
         #horiz(man,-speed/3)
-    if keys[pygame.K_UP]:
+    if keys[pygame.K_w]:
         man.set_facing("n")
         vert(man,-speed)
         #horiz(man,speed/3)
