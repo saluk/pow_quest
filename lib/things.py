@@ -26,6 +26,10 @@ class thing(object):
         for c in reversed(self.children):
             if c.mouse_click(pos,mode):
                 return True
+    def mouse_over(self,pos):
+        for c in reversed(self.children):
+            if c.mouse_over(pos):
+                return True
     def keypress(self,text):
         for c in reversed(self.children):
             if c.keypress(text):

@@ -135,7 +135,9 @@ while running:
     screen.blit(pygame.transform.scale(sc2x,res),[0,0])
     pygame.display.flip()
     
-    
+    sc = 320.0/res[0],200.0/res[1]
+    mp = pygame.mouse.get_pos()
+    mp = [int(mp[0]*sc[0]),int(mp[1]*sc[1])]
     for e in pygame.event.get():
         if e.type==pygame.QUIT:
             running = 0
@@ -144,14 +146,14 @@ while running:
         if e.type==pygame.KEYDOWN and e.key==pygame.K_q and e.mod | pygame.K_LCTRL:
             running = 0
         if e.type==pygame.MOUSEBUTTONDOWN:
-            sc = 320.0/res[0],200.0/res[1]
-            p = [int(e.pos[0]*sc[0]),int(e.pos[1]*sc[1])]
-            game.mouse_click(p)
+            game.mouse_click(mp)
         if e.type==pygame.KEYDOWN:
             if e.key==pygame.K_BACKSPACE:
                 game.keypress("backspace")
             else:
                 game.keypress(e.unicode)
+    
+    game.mouse_over(mp)
 
     keys = pygame.key.get_pressed()
     speed = 40
