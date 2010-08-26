@@ -214,9 +214,25 @@ class item(sprite):
         super(item,self).__init__("art/"+tag+".png",pos)
         self.tag = tag
         self.char = char
+        self.hover = False
     def mouse_click(self,pos,mode):
+        if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
+            self.execute()
+    def mouse_over(self,pos):
+        self.children = []
+        if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
+            self.children = [quick_textbox(self.tag,[self.pos[0],self.pos[1]-12])]
+    def execute(self):
         if self.tag == "smg":
-            self.char.weapon = {"type":"gun","damage":15,"accuracy":0,"reaction":0,"range":150}
+            if not self.char.weapon or self.char.weapon["tag"]!="smg":
+                self.char.weapon = {"type":"gun","damage":15,"accuracy":0,"reaction":0,"range":150,"tag":"smg"}
+            else:
+                self.char.weapon = None
+    def predraw(self,surf):
+        color = [0,0,0]
+        if self.char.weapon and self.char.weapon["tag"] == self.tag:
+            color = [0,0,100]
+        pygame.draw.rect(surf,color,[self.pos,[14,16]])
             
 class inventory_menu(thing):
     def __init__(self,char,pos):
@@ -232,9 +248,6 @@ class inventory_menu(thing):
                 self.children.append(item(o,[x,y+3],self.char))
                 x+=14
             self.last_invlist = self.char.inventory[:]
-    def predraw(self,surf):
-        bgcol = [0,0,0]
-        pygame.draw.rect(surf,bgcol,[self.pos,[14*len(self.char.inventory),16]])
         
 class menu(thing):
     def __init__(self,pos,width,options=None):
