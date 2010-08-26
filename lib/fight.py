@@ -123,7 +123,17 @@ class spot(thing):
                 
 class realchar(thing):
     def __init__(self):
+        """Stats info:
+        maxhp - maximum hit points
+        accuracy - starting band and minimum band
+                    accuracy of 0 starts at 180 and min band is 110
+                    each point decreases these values by 10
+        reaction - affects aim speed and other speeds of things
+                    each point of reaction adds 5 degrees to aim speed
+        focus - how many degrees are lost when things make you lose degrees,
+                   how long to charge spells"""
         super(realchar,self).__init__()
+        self.stats = {"maxhp":30,"reaction":5,"accuracy":1}
         self.hp = 30
         self.pos = [0,0]
         self.spot = None
@@ -158,7 +168,12 @@ class realchar(thing):
         self.target = char
         self.hit_region.start_pos = self.pos[:]
         self.hit_region.target_pos = char.pos[:]
+        self.hit_region.half_width = 90-self.stats["accuracy"]*10
         self.hit_region.update_stats()
+    def aim(self):
+        self.hit_region.shrink_rate = self.stats["reaction"]*5
+        self.hit_region.min_half_width = 60-self.stats["accuracy"]*10
+        self.hit_region.shrink()
     #~ def mouse_click(self,pos,mode):
         #~ if not self.children:
             #~ return
@@ -234,7 +249,7 @@ class action_menu(menu):
     def shoot(self):
         pygame.fight_scene.shoot_menu(self.character)
     def aim(self):
-        self.character.hit_region.shrink()
+        self.character.aim()
         pygame.fight_scene.next()
 
 class move_menu(thing):
