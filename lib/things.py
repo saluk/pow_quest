@@ -173,6 +173,9 @@ class char(sprite):
         
 class player_char(char):
     frob_range = 15
+    def __init__(self,*args):
+        super(player_char,self).__init__(*args)
+        self.inventory = ["bandaid","smg"]
     def draw(self,surf):
         super(player_char,self).draw(surf)
         for ob in pygame.scene.sprites.children:
@@ -204,6 +207,27 @@ class door(sprite):
             elif self.state == "open":
                 self.state = "closed"
             self.set_facing()
+            
+class item(sprite):
+    pass
+            
+class inventory_menu(thing):
+    def __init__(self,invlist,pos):
+        super(inventory_menu,self).__init__()
+        self.pos = pos
+        self.invlist = invlist
+        self.last_invlist = []
+    def update(self,dt):
+        if self.invlist != self.last_invlist:
+            self.children = []
+            x,y = self.pos
+            for o in self.invlist:
+                self.children.append(item("art/"+o+".png",[x,y+3]))
+                x+=14
+            self.last_invlist = self.invlist[:]
+    def predraw(self,surf):
+        bgcol = [0,0,0]
+        pygame.draw.rect(surf,bgcol,[self.pos,[14*len(self.invlist),16]])
         
 class menu(thing):
     def __init__(self,pos,width,options=None):
