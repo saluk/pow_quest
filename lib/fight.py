@@ -176,6 +176,7 @@ class realchar(thing):
         if self.target:
             self.hit_region.target_pos = self.target.pos[:]
         self.hit_region.half_width = 90-self.get_stat("accuracy")*10
+        self.hit_region.range = self.weapon.stats["range"]
         self.hit_region.update_stats()
     def choose_target(self,char):
         self.target = char
@@ -207,15 +208,15 @@ class weapon(thing):
             self.stats.update(stats)
     def set_stats(self):
         """Stats that match player stats are added to that stat"""
-        self.stats = {"type":"gun","damage":10,"accuracy":0,"reaction":0}
+        self.stats = {"type":"gun","damage":10,"accuracy":0,"reaction":0,"range":200}
 
 class gun(weapon):
     def set_stats(self):
-        self.stats = {"type":"gun","damage":10,"accuracy":-1}
+        self.stats = {"type":"gun","damage":10,"accuracy":-1,"range":200}
         
 class knife(weapon):
     def set_stats(self):
-        self.stats = {"type":"knife","damage":3,"accuracy":100}
+        self.stats = {"type":"knife","damage":3,"accuracy":100,"range":5}
 
 class action_menu(menu):
     """The fighting menu for a person"""
@@ -253,7 +254,7 @@ class action_menu(menu):
         self.character.weapon = gun({"accuracy":-2})
         self.character.reset_hit_region()
     def accurate_gun(self):
-        self.character.weapon = gun({"accuracy":2})
+        self.character.weapon = gun({"accuracy":2,"range":10})
         self.character.reset_hit_region()
 
 class move_menu(thing):
