@@ -168,6 +168,7 @@ class char(sprite):
         self.pos = pos
         self.set_facing(facing)
         self.weapon = None
+        self.armor = {"chest":None,"legs":None,"head":None}
         self.actions = ["talk"]
     def set_facing(self,facing):
         self.facing = facing
@@ -261,6 +262,11 @@ class item(sprite):
                 self.char.weapon = d
             else:
                 self.char.weapon = None
+        if d["type"]=="armor":
+            if not self.char.armor[d["position"]] or self.char.armor[d["position"]]["tag"] != self.tag:
+                self.char.armor[d["position"]] = d
+            else:
+                self.char.armor[d["position"]] = None
     def pickup(self):
         if not self.kill:
             self.kill = 1
@@ -270,6 +276,8 @@ class item(sprite):
             return
         color = [0,0,0]
         if self.char and self.char.weapon and self.char.weapon["tag"] == self.tag:
+            color = [0,0,100]
+        if self.char and "position" in self.stats and self.char.armor[self.stats["position"]] and self.char.armor[self.stats["position"]]["tag"] == self.tag:
             color = [0,0,100]
         pygame.draw.rect(surf,color,[self.pos,[14,16]])
             
