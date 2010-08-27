@@ -363,6 +363,7 @@ class fight_scene(thing):
         self.menus = thing()
         self.children.append(self.menus)
         self.turns = ["wait"]
+        pygame.play_music("chips/rontomo.s3m")
         self.calc_turns()
     def draw(self,surf):
         if self._debug_line:
@@ -468,6 +469,7 @@ class fight_scene(thing):
                 e.kill = 1
             self.goodies[0].pos = self.participants[0].pos
             pygame.scene.children = self.restore_children
+            pygame.play_music("chips/YIFFY.IT")
         if not [x for x in self.participants if not x.enemy]:
             print "you lose"
             sys.exit()

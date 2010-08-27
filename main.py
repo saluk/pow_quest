@@ -2,6 +2,8 @@ import sys
 import pygame
 import random
 pygame.init()
+import pygame.mixer
+pygame.mixer.init()
 
 from lib.things import *
 from lib.fight import *
@@ -47,6 +49,15 @@ def debug_menu():
     main_menu.edit_fight = edit_fight
     main_menu.edit_world = edit_world
 
+def play_music(x):
+    if hasattr(pygame,"cur_music"):
+        if pygame.cur_music==x:
+            return
+    pygame.cur_music = x
+    pygame.mixer.music.load("music/"+x)
+    pygame.mixer.music.play()
+pygame.play_music = play_music
+
 def load_scene(scene_name,char):
     pygame.cur_scene_name = scene_name
     scene = pygame.cur_scene = pygame.scene_data[scene_name]
@@ -70,6 +81,7 @@ def load_scene(scene_name,char):
         #~ pygame.scene.children = [fight_scene(pygame.scene.children,[man],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"])]
     pygame.scene.children.append(inventory_menu(man,[0,184]))
     debug_menu()
+    play_music("chips/YIFFY.IT")
 
 f = open("data/scenes.txt")
 pygame.scene_data = eval(f.read())
