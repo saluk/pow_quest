@@ -1,4 +1,5 @@
 import pygame
+import math
 
 class thing(object):
     kill = 0
@@ -169,8 +170,32 @@ class char(sprite):
         self.weapon = None
         self.actions = ["talk"]
     def set_facing(self,facing):
+        self.facing = facing
         super(char,self).__init__("art/%s_%s_idle.png"%(self.tag,facing),self.pos)
         self.center = True
+        
+class enemy_char(char):
+    def perception(self,obs):
+        for o in obs:
+            if self.can_see(o):
+                return True
+    def can_see(self,ob):
+        rise = self.pos[0]-ob.pos[0]
+        run = self.pos[1]-ob.pos[1]
+        ang = math.atan2(run,rise)*180.0/math.pi
+        curang = {"e":0,"n":90,"w":180,"s":270}[self.facing]
+        while ang<0:
+            ang+=360
+        if ang<curang:
+            ang,curang = curang,ang
+        if ang-curang<60:
+            return True
+    def update(self,dt):
+        super(enemy_char,self).update(dt)
+        if self.can_see(pygame.player):
+            from fight import fight_scene
+            pygame.scene.children = [fight_scene(pygame.scene.children,[pygame.player],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"])]
+        
         
 class player_char(char):
     frob_range = 15

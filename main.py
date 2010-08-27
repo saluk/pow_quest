@@ -82,7 +82,7 @@ for o in eval(open("data/objects.txt").read()):
     else:
         pos = o["pos"]
     if o["type"] == "enemy":
-        ob = char("army",pos)
+        ob = enemy_char("army",pos)
         ob.is_enemy = True
     if o["type"] == "door":
         ob = door("door1",pos,"closed")
@@ -97,9 +97,9 @@ for o in eval(open("data/objects.txt").read()):
 bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
 
-man = player_char("army",[160,140])
+man = player_char("army",[160,60])
 pygame.player = man
-load_scene("jail",man)
+load_scene("start",man)
 scene.sprites.children.append(man)
 
 scene.children.append(entry_box(">",[160,140]))
