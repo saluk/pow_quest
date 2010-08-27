@@ -208,15 +208,19 @@ class weapon(thing):
             self.stats.update(stats)
     def set_stats(self):
         """Stats that match player stats are added to that stat"""
-        self.stats = {"type":"gun","damage":10,"accuracy":0,"reaction":0,"range":200}
+        self.stats = {"type":"gun","damage":0,"accuracy":0,"reaction":0,"range":0,"armor":0,"coverage":0}
 
 class gun(weapon):
     def set_stats(self):
-        self.stats = {"type":"gun","damage":10,"accuracy":-1,"range":200}
+        self.stats = {"type":"gun","damage":10,"accuracy":-1,"range":200,"armor":0}
         
 class knife(weapon):
     def set_stats(self):
-        self.stats = {"type":"knife","damage":3,"accuracy":100,"range":5}
+        self.stats = {"type":"knife","damage":3,"accuracy":100,"range":5,"armor":0}
+        
+class bulletvest(weapon):
+    def set_stats(self):
+        self.stats = {"armor":1,"reaction":-0.5,"coverage":0.25}  #Coverage for chest goes up to 0.25
 
 class action_menu(menu):
     """The fighting menu for a person"""
@@ -339,6 +343,9 @@ class fight_scene(thing):
             spot = choose_closest_to(good,[x for x in self.spots.values() if not x.contains])
             player = realchar().set_spot(spot)
             player.weapon = gun(good.weapon)
+            player.armor = good.armor
+            for p in player.armor:
+                player.armor[p] = weapon(player.armor[p])
             player.sprite.set_facing("n")
             self.participants = [player]
         
