@@ -133,11 +133,13 @@ class realchar(thing):
         focus - how many degrees are lost when things make you lose degrees,
                    how long to charge spells"""
         super(realchar,self).__init__()
-        self.stats = {"maxhp":30,"reaction":5,"accuracy":1}
+        self.stats = {"maxhp":30,"reaction":5,"accuracy":1,"armor":1}
         self.hp = 30
         self.pos = [0,0]
         self.spot = None
         self.weapon = None
+        self.armor = {"chest":None,"legs":None,"head":None}
+        #Chest is up to 0.5 coverage, legs are 0.2 and head is 0.25
         self.sprite = char("army",[100,100])
         self.health_bar = quick_textbox("",[100,100])
         self.children = []
@@ -187,18 +189,20 @@ class realchar(thing):
         self.hit_region.shrink()
     def get_stat(self,key):
         """Gets a stat, including modifications"""
+        if key=="coverage":
+            return sum([x.stats["coverage"] for x in self.armor.values() if x])
         s = self.stats[key]
         if self.weapon and key in self.weapon.stats:
             s+=self.weapon.stats[key]
+        for a in self.armor.values():
+            if a and key in a.stats:
+                s+=a.stats[key]
         return s
-    #~ def mouse_click(self,pos,mode):
-        #~ if not self.children:
-            #~ return
-        #~ x,y = pos
-        #~ cx,cy = self.sprite.pos
-        #~ cw,ch = self.sprite.surf.get_size()
-        #~ if x>=cx and x<=cx+cw and y>=cy and y<=cy+ch:
-            #~ pygame.scene.children[0].action_menu(self)
+    def damage(self,amount):
+        if random.random()<self.get_stat("coverage"):
+            amount *= (0.75**self.get_stat("armor"))
+        self.hp -= amount
+        return amount
         
 class weapon(thing):
     def __init__(self,stats=None):
@@ -355,6 +359,7 @@ class fight_scene(thing):
             enemy = realchar().set_spot(spot)
             enemy.weapon = gun()
             enemy.enemy = True
+            enemy.stats["accuracy"] = 9
             self.participants.append(enemy)
         
         self.menus = thing()
@@ -418,26 +423,22 @@ class fight_scene(thing):
             w,h = [10,10]
             x = part.pos[0]-w//2
             y = part.pos[1]-h//2
-            print [p,char.target.pos],[[x,y],[w,h]]
             if line_box(shoot_path,[[x,y],[w,h]]):
                 target = part
-                print "found target"
                 break
         if not target or target.dist>char.hit_region.range**2:
             self.children.append(popup_text("Miss",tp[:]))
             return
         angle = hit_region(char.pos,target.pos).target_angle
         width = char.hit_region.half_width
-        print width
         diff = abs(char.hit_region.target_angle-angle)+width/3.0
-        print diff
         r = abs(random.randint(int(angle-diff),int(angle+diff))-angle)
         if r>10:
             self.children.append(popup_text("Near miss",target.pos[:]))
             return
         damage = char.weapon.stats["damage"]
         tp = target.pos
-        target.hp-=damage
+        damage = target.damage(damage)
         self.children.append(popup_text(str(damage),tp[:]))
         if target.hp<=0:
             target.set_spot(None)
