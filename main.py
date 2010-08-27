@@ -55,7 +55,7 @@ def play_music(x):
             return
     pygame.cur_music = x
     pygame.mixer.music.load("music/"+x)
-    pygame.mixer.music.play()
+    pygame.mixer.music.play(-1)
 pygame.play_music = play_music
 
 def load_scene(scene_name,char):
