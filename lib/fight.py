@@ -362,7 +362,7 @@ class fight_scene(thing):
         
         self.menus = thing()
         self.children.append(self.menus)
-        self.turns = ["wait"]
+        self.turns = []
         pygame.play_music("chips/rontomo.s3m")
         self.calc_turns()
     def draw(self,surf):
@@ -383,7 +383,6 @@ class fight_scene(thing):
         self.turn_start = True
         for p in self.participants:
             self.turns.append(p)
-            self.turns.append("wait")
         self.next_mode = 1
     def next(self):
         self.turn_start = True
@@ -427,7 +426,7 @@ class fight_scene(thing):
                 break
         if not target or target.dist>char.hit_region.range**2:
             self.children.append(popup_text("Miss",tp[:]))
-            return
+            return "miss",target
         angle = hit_region(char.pos,target.pos).target_angle
         diff = angle-shoot_angle
         if angle<shoot_angle:
@@ -441,17 +440,18 @@ class fight_scene(thing):
         if target.hp<=0:
             target.set_spot(None)
             self.participants.remove(target)
-            self.clear_targets()
+            return "kill",target
+        return "damage",target,damage
     def update(self,dt):
         "Update timers if no interface is up"
         nt = self.turns[0]
-        if nt == "wait":
+        if hasattr(nt,"startswith") and nt.startswith("wait"):
             self.turn_start = False
             self.finish()
             self.next_mode -= dt
             if self.next_mode <= 0:
                 self.next()
-                self.next_mode = 0.2
+                self.next_mode = float(nt.split(":")[1])
         elif self.turn_start:
             self.turn_start = False
             p = nt
@@ -484,13 +484,23 @@ class fight_scene(thing):
         if not char.target:
             self.next()
             return
-        if char.weapon.stats["type"]=="knife":
+        need_near = False
+        result = [None]
+        if need_near:
             if char.target not in char.spot.near():
                 options = char.spot.can_move()
                 if options:
                     char.set_spot(choose_closest_to(char.target,options))
             else:
-                self.shoot(char)
-        elif char.weapon.stats["type"]=="gun":
-            self.shoot(char)
+                result = self.shoot(char)
+        else:
+            result = self.shoot(char)
+        if result[0] == "kill":
+            self.turns.insert(1,"wait:2")
+        elif result[0] == "miss":
+            self.turns.insert(1,"wait:0.01")
+        elif result[0] == "damage":
+            if result[1] in self.players():
+                self.turns.insert(1,"wait:0.5")
+            self.turns.insert(1,"wait:0.5")
         self.next()
