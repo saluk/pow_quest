@@ -74,6 +74,8 @@ def load_scene(scene_name,char):
 f = open("data/scenes.txt")
 pygame.scene_data = eval(f.read())
 
+pygame.all_items = eval(open("data/items.txt").read())
+
 pygame.all_objects = []
 for o in eval(open("data/objects.txt").read()):
     ob = None
@@ -86,8 +88,8 @@ for o in eval(open("data/objects.txt").read()):
         ob.is_enemy = True
     if o["type"] == "door":
         ob = door("door1",pos,"closed")
-    if o["type"] == "bandaid":
-        ob = item("bandaid",pos,False,True)
+    if o["type"] in pygame.all_items:
+        ob = item(o["type"],pos,False,True,pygame.all_items[o["type"]])
     if ob:
         ob.data = o
         obs = pygame.scene_data[o["scene"]].get("obs",[])
