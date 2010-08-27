@@ -1,0 +1,5 @@
+{
+    "bulletvest": {"type":"armor", "armor":2, "coverage": 0.3, "position":"chest"},
+    "bandaid": {"type":"restore", "amount":10},
+    "smg": {"type":"weapon", "range":100, "damage":5, "shots":5, "accuracy":-2}
+}
