@@ -34,9 +34,11 @@ class place_menu(thing):
         return True
         
 class add_menu(menu):
-    def __init__(self):
+    def __init__(self,parent):
         super(add_menu,self).__init__([50,0],150)
-        self.options = ["enemy","door","bandaid"]
+        self.parent = parent
+        self.options = ["enemy","door"]
+        self.options.extend(self.parent.items.keys())
     def execute(self,option):
         command = option.lines[0]
         o = {"type":command,"scene":self.parent.scene_name,"pos":"random"}
@@ -70,8 +72,7 @@ class edit_menu(menu):
     def exit(self):
         self.parent.finish()
     def add(self):
-        sm = add_menu()
-        sm.parent = self.parent
+        sm = add_menu(self.parent)
         self.parent.children.append(sm)
         
 class object_menu(menu):
@@ -134,6 +135,7 @@ class edit(thing):
         self.children.insert(0,self.interface)
         self.objects = thing()
         self.children.append(self.objects)
+        self.items = eval(open("data/items.txt").read())
         self.obdat = []
         for o in eval(open("data/objects.txt").read()):
             ob = None
@@ -148,8 +150,9 @@ class edit(thing):
             ob = game_object("army",pos)
         if o["type"] == "door":
             ob = game_door("door1",pos)
-        if o["type"] == "bandaid":
-            ob = game_item("bandaid",pos,None,True)
+        if o["type"] in self.items.keys():
+            ob = game_item(o["type"],pos,None,True)
+            ob.stats = self.items[o["type"]]
         if ob:
             ob.parent = self
             ob.data = o
