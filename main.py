@@ -96,6 +96,7 @@ bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
 
 man = player_char("army",[160,140])
+pygame.player = man
 load_scene("jail",man)
 scene.sprites.children.append(man)
 

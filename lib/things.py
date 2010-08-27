@@ -210,14 +210,18 @@ class door(sprite):
             self.set_facing()
             
 class item(sprite):
-    def __init__(self,tag,pos,char):
+    def __init__(self,tag,pos,char,world=False):
         super(item,self).__init__("art/"+tag+".png",pos)
         self.tag = tag
         self.char = char
         self.hover = False
+        self.world = world   #In the scene or on the interface
     def mouse_click(self,pos,mode):
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
-            self.execute()
+            if not self.world:
+                self.execute()
+            else:
+                self.pickup()
     def mouse_over(self,pos):
         self.children = []
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
@@ -228,9 +232,14 @@ class item(sprite):
                 self.char.weapon = {"type":"gun","damage":15,"accuracy":0,"reaction":0,"range":150,"tag":"smg"}
             else:
                 self.char.weapon = None
+    def pickup(self):
+        self.kill = 1
+        pygame.player.inventory.append(self.tag)
     def predraw(self,surf):
+        if self.world:
+            return
         color = [0,0,0]
-        if self.char.weapon and self.char.weapon["tag"] == self.tag:
+        if self.char and self.char.weapon and self.char.weapon["tag"] == self.tag:
             color = [0,0,100]
         pygame.draw.rect(surf,color,[self.pos,[14,16]])
             

@@ -37,15 +37,11 @@ class place_menu(thing):
 class add_menu(menu):
     def __init__(self):
         super(add_menu,self).__init__([50,0],150)
-        self.options = ["enemy","door"]
+        self.options = ["enemy","door","bandaid"]
     def execute(self,option):
         command = option.lines[0]
-        if command == "enemy":
-            ob = game_object("army",[0,0])
-        if command == "door":
-            ob = game_door("door1",[0,0])
-        ob.data = {"type":command,"scene":self.parent.scene_name,"pos":"random"}
-        ob.parent = self.parent
+        o = {"type":command,"scene":self.parent.scene_name,"pos":"random"}
+        ob = self.parent.create_template(o,[0,0])
         pm = place_menu(ob)
         pm.parent = self.parent
         self.parent.interface.children = [pm]
@@ -104,7 +100,7 @@ class move_object(thing):
         self.kill = 1
         return True
         
-class game_object(char):
+class editor_ob:
     def mouse_click(self,pos,mode):
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+self.surf.get_width() and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+self.surf.get_height():
             om = object_menu(pos,50)
@@ -112,15 +108,15 @@ class game_object(char):
             om.char = self
             self.parent.children.append(om)
             return True
+        
+class game_object(editor_ob,char):
+    pass
 
-class game_door(door):
-    def mouse_click(self,pos,mode):
-        if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+self.surf.get_width() and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+self.surf.get_height():
-            om = object_menu(pos,50)
-            om.parent = self.parent
-            om.char = self
-            self.parent.children.append(om)
-            return True
+class game_door(editor_ob,door):
+    pass
+            
+class game_item(editor_ob,item):
+    pass
 
 class edit(thing):
     def __init__(self,children,scene_name):
@@ -146,15 +142,20 @@ class edit(thing):
                 pos = [random.randint(40,140),random.randint(40,140)]
             else:
                 pos = o["pos"]
-            if o["type"] == "enemy":
-                ob = game_object("army",pos)
-            if o["type"] == "door":
-                ob = game_door("door1",pos)
-            if ob:
-                ob.parent = self
-                ob.data = o
-                self.obdat.append(ob)
+            self.create_template(o,pos)
         self.load(scene_name)
+    def create_template(self,o,pos):
+        if o["type"] == "enemy":
+            ob = game_object("army",pos)
+        if o["type"] == "door":
+            ob = game_door("door1",pos)
+        if o["type"] == "bandaid":
+            ob = game_item("bandaid",pos,None,True)
+        if ob:
+            ob.parent = self
+            ob.data = o
+            self.obdat.append(ob)
+        return ob
     def load(self,scene_name):
         self.scene_name = scene_name
         self.scene_data = pygame.scene_data[self.scene_name]
