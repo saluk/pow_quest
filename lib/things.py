@@ -37,7 +37,7 @@ class thing(object):
                 return True
 
 class textbox(thing):
-    def __init__(self,text,pos,width=150):
+    def __init__(self,text,pos,width=150,maxy=200,miny=0):
         super(textbox,self).__init__()
         self.lines = []
         self.to_print = list(text)
@@ -46,9 +46,13 @@ class textbox(thing):
         self.font = pygame.mainfont
         self.color = [255,255,255]
         self.width = width
+        self.height = 0
+        self.maxy = maxy
+        self.miny = miny
     def update(self,dt):
         if not self.to_print:
             return
+        self.height = 0
         self.next -= dt
         if self.next < 0:
             self.next = 0.02
@@ -73,6 +77,11 @@ class textbox(thing):
         return self.font.render(text,1,self.color)
     def draw(self,surf):
         x,y = self.pos
+        height = len(self.lines)*10
+        if y+height>self.maxy:
+            y-=(y+height-self.maxy)
+        if y<self.miny:
+            y = self.miny
         for line in self.lines:
             rline = self.render_line(line)
             surf.blit(rline,[x,y])
@@ -82,6 +91,27 @@ class quick_textbox(textbox):
     def update(self,dt):
         while self.to_print:
             super(quick_textbox,self).update(5)
+            
+class border_textbox(quick_textbox):
+    def predraw(self,surf):
+        x,y=self.pos
+        height = len(self.lines)*10
+        if y+height>self.maxy:
+            y-=(y+height-self.maxy)
+        if y<self.miny:
+            y = self.miny
+        outcol = [124,124,124]
+        incol = [70,70,70]
+        bgcol = [0,0,0]
+        pygame.draw.rect(surf,bgcol,[[x+1,y+1],[self.width-2,height-2]])
+        pygame.draw.line(surf,outcol,[x+1,y],[x+self.width-1,y])
+        pygame.draw.line(surf,outcol,[x+1,y+height],[x+self.width-1,y+height])
+        pygame.draw.line(surf,outcol,[x,y+1],[x,y+height-1])
+        pygame.draw.line(surf,outcol,[x+self.width,y+1],[x+self.width,y+height-1])
+        pygame.draw.line(surf,incol,[x+1,y+1],[x+self.width-1,y+1])
+        pygame.draw.line(surf,incol,[x+1,y+height-1],[x+self.width-1,y+height-1])
+        pygame.draw.line(surf,incol,[x+1,y+1],[x+1,y+height-1])
+        pygame.draw.line(surf,incol,[x+self.width-1,y+1],[x+self.width-1,y+height-1])
             
 class entry_box(quick_textbox):
     def keypress(self,text):
@@ -252,7 +282,10 @@ class item(sprite):
     def mouse_over(self,pos):
         self.children = []
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
-            self.children = [quick_textbox(self.tag,[self.pos[0],self.pos[1]-12])]
+            t = self.tag
+            for s in sorted(self.stats):
+                t+="\n"+s+": "+str(self.stats[s])
+            self.children = [border_textbox(t,[self.pos[0],self.pos[1]],maxy=self.pos[1])]
     def execute(self):
         d = {}
         d.update(self.stats)
@@ -272,6 +305,9 @@ class item(sprite):
             self.kill = 1
             pygame.player.inventory.append(self.tag)
     def predraw(self,surf):
+        self.draw_box(surf)
+        self.draw_item(surf)
+    def draw_box(self,surf):
         if self.world:
             return
         color = [0,0,0]
@@ -280,6 +316,10 @@ class item(sprite):
         if self.char and "position" in self.stats and self.char.armor[self.stats["position"]] and self.char.armor[self.stats["position"]]["tag"] == self.tag:
             color = [0,0,100]
         pygame.draw.rect(surf,color,[self.pos,[14,16]])
+    def draw_item(self,surf):
+        super(item,self).draw(surf)
+    def draw(self,surf):
+        pass
             
 class inventory_menu(thing):
     def __init__(self,char,pos):
