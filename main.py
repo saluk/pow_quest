@@ -86,6 +86,8 @@ for o in eval(open("data/objects.txt").read()):
         ob.is_enemy = True
     if o["type"] == "door":
         ob = door("door1",pos,"closed")
+    if o["type"] == "bandaid":
+        ob = item("bandaid",pos,False,True)
     if ob:
         ob.data = o
         obs = pygame.scene_data[o["scene"]].get("obs",[])

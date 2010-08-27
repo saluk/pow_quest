@@ -233,8 +233,9 @@ class item(sprite):
             else:
                 self.char.weapon = None
     def pickup(self):
-        self.kill = 1
-        pygame.player.inventory.append(self.tag)
+        if not self.kill:
+            self.kill = 1
+            pygame.player.inventory.append(self.tag)
     def predraw(self,surf):
         if self.world:
             return
