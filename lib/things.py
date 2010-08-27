@@ -235,12 +235,13 @@ class door(sprite):
             self.set_facing()
             
 class item(sprite):
-    def __init__(self,tag,pos,char,world=False):
+    def __init__(self,tag,pos,char,world=False,stats={}):
         super(item,self).__init__("art/"+tag+".png",pos)
         self.tag = tag
         self.char = char
         self.hover = False
         self.world = world   #In the scene or on the interface
+        self.stats = stats
     def mouse_click(self,pos,mode):
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
             if not self.world:
@@ -252,9 +253,12 @@ class item(sprite):
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
             self.children = [quick_textbox(self.tag,[self.pos[0],self.pos[1]-12])]
     def execute(self):
-        if self.tag == "smg":
-            if not self.char.weapon or self.char.weapon["tag"]!="smg":
-                self.char.weapon = {"type":"gun","damage":15,"accuracy":0,"reaction":0,"range":150,"tag":"smg"}
+        d = {}
+        d.update(self.stats)
+        d["tag"] = self.tag
+        if d["type"]=="weapon":
+            if not self.char.weapon or self.char.weapon["tag"]!=self.tag:
+                self.char.weapon = d
             else:
                 self.char.weapon = None
     def pickup(self):
@@ -280,7 +284,7 @@ class inventory_menu(thing):
             self.children = []
             x,y = self.pos
             for o in self.char.inventory:
-                self.children.append(item(o,[x,y+3],self.char))
+                self.children.append(item(o,[x,y+3],self.char,False,pygame.all_items[o]))
                 x+=14
             self.last_invlist = self.char.inventory[:]
         
