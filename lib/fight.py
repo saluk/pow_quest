@@ -43,14 +43,13 @@ class hit_region(thing):
         mean = self.target_angle
         std_dev = self.half_width/3.0
         ang = random.gauss(mean,std_dev)
-        print ang,mean
         return ang
     def random_line(self):
         """Pick a random firing angle based on our width. Distribution should be somewhat normal,
         center angle should be more common than edges."""
         ang = self.get_angle()
         length = self.range
-        return make_line(self.start_pos,ang,length)
+        return make_line(self.start_pos,ang,length),ang
     def update_stats(self):
         rise = self.target_pos[0]-self.start_pos[0]
         run = self.target_pos[1]-self.start_pos[1]
@@ -358,7 +357,7 @@ class fight_scene(thing):
             enemy = realchar().set_spot(spot)
             enemy.weapon = gun()
             enemy.enemy = True
-            enemy.stats["accuracy"] = 9
+            enemy.stats["accuracy"] = 0
             self.participants.append(enemy)
         
         self.menus = thing()
@@ -413,7 +412,7 @@ class fight_scene(thing):
         target = None
         tp = char.target.pos
         i = 0
-        shoot_path = char.hit_region.random_line()
+        shoot_path,shoot_angle = char.hit_region.random_line()
         self._debug_line = shoot_path
         for part in sorted(self.participants,key=lambda x: x.dist):
             if part == char:
@@ -429,13 +428,12 @@ class fight_scene(thing):
             self.children.append(popup_text("Miss",tp[:]))
             return
         angle = hit_region(char.pos,target.pos).target_angle
-        width = char.hit_region.half_width
-        diff = abs(char.hit_region.target_angle-angle)+width/3.0
-        r = abs(random.randint(int(angle-diff),int(angle+diff))-angle)
-        if r>10:
-            self.children.append(popup_text("Near miss",target.pos[:]))
-            return
+        diff = angle-shoot_angle
+        if angle<shoot_angle:
+            diff = shoot_angle-angle
         damage = char.weapon.stats["damage"]
+        if diff>3:
+            damage*=0.5
         tp = target.pos
         damage = target.damage(damage)
         self.children.append(popup_text(str(damage),tp[:]))
