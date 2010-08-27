@@ -29,7 +29,6 @@ class place_menu(thing):
     def mouse_click(self,pos,mode):
         self.char.pos = pos
         self.char.data["pos"] = pos
-        self.parent.obdat.append(self.char)
         self.parent.objects.children.append(self.char)
         self.kill = 1
         return True
