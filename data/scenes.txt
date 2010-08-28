@@ -55,4 +55,8 @@
         "map":"4way",
         "fight":"fight4"
     },
+    "kitchen":{
+        "map":"kitchen",
+        "fight":"fight5"
+    },
 }
