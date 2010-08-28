@@ -141,7 +141,7 @@ class realchar(thing):
         self.hp = 30
         self.pos = [0,0]
         self.spot = None
-        self.weapon = weapon({"range":50,"damage":2,"accuracy":4,"tag":"hands"})
+        self.weapon = {"range":50,"damage":2,"accuracy":4,"tag":"hands"}
         self.armor = {"chest":None,"legs":None,"head":None}
         #Chest is up to 0.5 coverage, legs are 0.2 and head is 0.25
         self.sprite = char("army",[100,100])
@@ -208,7 +208,7 @@ class realchar(thing):
         if self.target:
             self.hit_region.target_pos = self.target.pos[:]
         self.hit_region.half_width = 90-self.get_stat("accuracy")*10
-        self.hit_region.range = self.weapon.stats["range"]
+        self.hit_region.range = self.weapon["range"]
         self.hit_region.update_stats()
     def choose_target(self,char):
         self.target = char
@@ -220,30 +220,19 @@ class realchar(thing):
     def get_stat(self,key):
         """Gets a stat, including modifications"""
         if key=="coverage":
-            return sum([x.stats["coverage"] for x in self.armor.values() if x])
+            return sum([x["coverage"] for x in self.armor.values() if x])
         s = self.stats[key]
-        if self.weapon and key in self.weapon.stats:
-            s+=self.weapon.stats[key]
+        if self.weapon and key in self.weapon:
+            s+=self.weapon[key]
         for a in self.armor.values():
-            if a and key in a.stats:
-                s+=a.stats[key]
+            if a and key in a:
+                s+=a[key]
         return s
     def damage(self,amount):
         if random.random()<self.get_stat("coverage"):
             amount *= (0.75**self.get_stat("armor"))
         self.hp -= amount
         return amount
-        
-class weapon(thing):
-    def __init__(self,stats=None):
-        super(weapon,self).__init__()
-        self.set_stats()
-        if stats:
-            self.stats.update(stats)
-    def set_stats(self):
-        """Stats that match player stats are added to that stat"""
-        self.stats = {"type":"gun","damage":0,"accuracy":0,"reaction":0,"range":0,
-                        "armor":0,"coverage":0,"shots":1}
 
 class action_menu(menu):
     """The fighting menu for a person"""
@@ -261,6 +250,7 @@ class action_menu(menu):
                 self.options.append("aim")
                 self.options.append("shoot")
         self.options.append("grenade")
+        self.options.append("use item")
         if character.spot.can_move():
             self.options.append("move")
     def move(self):
@@ -271,6 +261,8 @@ class action_menu(menu):
         pygame.fight_scene.shoot_menu(self.character)
     def grenade(self):
         pygame.fight_scene.grenade_menu(self.character)
+    def use_item(self):
+        pygame.fight_scene.inv_ok = True
     def aim(self):
         self.character.aim()
         pygame.fight_scene.next()
@@ -415,10 +407,10 @@ class fight_scene(thing):
             player.fight_scene = self
             player.set_spot(spot)
             if good.weapon:
-                player.weapon = weapon(good.weapon)
+                player.weapon = good.weapon
                 player.stats["weapon"] = good.weapon["tag"]
             for p in good.armor:
-                player.armor[p] = weapon(good.armor[p])
+                player.armor[p] = good.armor[p]
             player.hp = good.hp
             player.sprite.set_facing("n")
             player.inventory = good.inventory
@@ -435,7 +427,7 @@ class fight_scene(thing):
             enemy.set_spot(spot)
             enemy.stats = stats
             enemy.hp = stats["maxhp"]
-            enemy.weapon = weapon(pygame.all_items[enemy.stats["weapon"]])
+            enemy.weapon = pygame.all_items[enemy.stats["weapon"]]
             enemy.enemy = True
             self.participants.append(enemy)
         
@@ -518,7 +510,7 @@ class fight_scene(thing):
             part.dist = d
         #Iterate through participants in order of distance until we hit it
         tp = char.target.pos
-        for shot in range(char.weapon.stats["shots"]):
+        for shot in range(char.weapon.get("shots",1)):
             target = None
             shoot_path,shoot_angle = char.hit_region.random_line()
             hit_wall,hitd = self.hit_wall(shoot_path)
@@ -539,7 +531,7 @@ class fight_scene(thing):
             diff = angle-shoot_angle
             if angle<shoot_angle:
                 diff = shoot_angle-angle
-            damage = char.weapon.stats["damage"]
+            damage = char.weapon["damage"]
             if diff>3:
                 damage*=0.5
             tp = target.pos
@@ -650,6 +642,8 @@ class fight_scene(thing):
             player = self.goodies[0]
             player.pos = self.participants[0].pos
             player.hp = self.participants[0].hp
+            player.weapon = self.participants[0].weapon
+            player.armor = self.participants[0].armor
             pygame.play_music("chips/kupla.it")
             def after():
                 pygame.scene.children = self.restore_children

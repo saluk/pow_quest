@@ -388,6 +388,10 @@ class fight_inventory_menu(inventory_menu):
         if self.fight_scene.inv_ok:
             super(fight_inventory_menu,self).mouse_click(pos,mode)
             self.fight_scene.next()
+    def draw(self,surf):
+        if self.fight_scene.inv_ok:
+            pygame.draw.line(surf,[255,255,255],[0,183],[320,183])
+        super(fight_inventory_menu,self).draw(surf)
     
         
 class menu(thing):
