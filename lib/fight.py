@@ -193,6 +193,7 @@ class realchar(thing):
             self.spot = spot
             self.children.append(self.sprite)
             self.pos = self.sprite.pos = self.spot.pos
+            self.reset_hit_region()
         return self
     def reset_hit_region(self):
         self.hit_region.start_pos = self.pos[:]
