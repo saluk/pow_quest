@@ -327,7 +327,7 @@ def choose_closest_to(ob,spots):
     return closest
         
 class fight_scene(thing):
-    def __init__(self,restore_children,goodies,enemies,bg,fight):
+    def __init__(self,restore_children,goodies,enemies,bg,fight,objects):
         self._debug_line = None
         
         super(fight_scene,self).__init__()
@@ -372,6 +372,11 @@ class fight_scene(thing):
             enemy.enemy = True
             self.participants.append(enemy)
         
+        self.debris = []
+        for o in objects:
+            self.debris.append(o)
+            self.children.append(o)
+        
         self.menus = thing()
         self.children.append(self.menus)
         self.turns = []
@@ -415,8 +420,9 @@ class fight_scene(thing):
         self.next()
     def shoot(self,char):
         p = char.pos
+        obs = self.participants + self.debris
         #Sort participants by range
-        for part in self.participants:
+        for part in obs:
             tp = part.pos
             d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
             part.dist = d
@@ -430,7 +436,7 @@ class fight_scene(thing):
         for shot in range(char.weapon.stats["shots"]):
             shoot_path,shoot_angle = char.hit_region.random_line()
             self._debug_line = shoot_path
-            for part in sorted(self.participants,key=lambda x: x.dist):
+            for part in sorted(obs,key=lambda x: x.dist):
                 if part == char:
                     continue
                 i+=1
@@ -451,6 +457,9 @@ class fight_scene(thing):
             if diff>3:
                 damage*=0.5
             tp = target.pos
+            if not hasattr(target,"hp"):
+                self.children.append(popup_text("Blocked!",tp[:]))
+                continue
             damage = target.damage(damage)
             if damage and target in self.players():
                 player_hits += 1

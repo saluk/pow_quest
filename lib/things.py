@@ -225,7 +225,8 @@ class enemy_char(char):
         super(enemy_char,self).update(dt)
         if self.can_see(pygame.player):
             from fight import fight_scene
-            pygame.scene.children = [fight_scene(pygame.scene.children,[pygame.player],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"])]
+            obs = [x for x in pygame.scene.sprites.children if x not in pygame.scene.enemies and x not in [pygame.player]]
+            pygame.scene.children = [fight_scene(pygame.scene.children,[pygame.player],pygame.scene.enemies,pygame.bg,pygame.cur_scene["fight"],obs)]
         
         
 class player_char(char):

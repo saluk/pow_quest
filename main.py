@@ -106,6 +106,8 @@ for o in eval(open("data/objects.txt").read()):
         ob = door("door1",pos,"closed")
     if o["type"] in pygame.all_items:
         ob = item(o["type"],pos,False,True,pygame.all_items[o["type"]])
+    if o["type"] == "crate":
+        ob = sprite("art/crate.png",pos)
     if ob:
         ob.data = o
         obs = pygame.scene_data[o["scene"]].get("obs",[])

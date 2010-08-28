@@ -3,5 +3,5 @@
     "cap": {"type":"armor", "armor":1, "coverage":0.24, "position":"head"},
     "reinforcedcap": {"type":"armor", "armor":2, "coverage":0.24, "position":"head"},
     "bandaid": {"type":"restore", "amount":10},
-    "smg": {"type":"weapon", "range":100, "damage":5, "shots":5, "accuracy":-2}
+    "smg": {"type":"weapon", "range":100, "damage":5, "shots":1, "accuracy":-2}
 }
