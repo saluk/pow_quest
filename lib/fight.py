@@ -194,6 +194,7 @@ class realchar(thing):
             self.children.append(self.sprite)
             self.pos = self.sprite.pos = self.spot.pos
             self.reset_hit_region()
+            self.fight_scene.moving_piece(self)
         return self
     def reset_hit_region(self):
         self.hit_region.start_pos = self.pos[:]
@@ -339,11 +340,15 @@ class fight_scene(thing):
         self.load_spots_from_file("data/%s.txt"%fight)
         for s in self.spots.values():
             self.children.append(s)
+            
+        self.participants = []
         
         self.goodies = goodies
         for good in goodies:
             spot = choose_closest_to(good,[x for x in self.spots.values() if not x.contains])
-            player = realchar().set_spot(spot)
+            player = realchar()
+            player.fight_scene = self
+            player.set_spot(spot)
             if good.weapon:
                 player.weapon = weapon(good.weapon)
                 player.stats["weapon"] = good.weapon["tag"]
@@ -356,7 +361,9 @@ class fight_scene(thing):
         for enemy in enemies:
             spot = choose_closest_to(enemy,[x for x in self.spots.values() if not x.contains])
             stats = enemy.stats
-            enemy = realchar().set_spot(spot)
+            enemy = realchar()
+            enemy.fight_scene = self
+            enemy.set_spot(spot)
             enemy.stats = stats
             enemy.hp = stats["maxhp"]
             enemy.weapon = weapon(pygame.all_items[enemy.stats["weapon"]])
@@ -443,6 +450,9 @@ class fight_scene(thing):
         if target.hp<=0:
             target.set_spot(None)
             self.participants.remove(target)
+            for p in self.participants:
+                if p.target == target:
+                    p.target = None
             return "kill",target
         return "damage",target,damage
     def update(self,dt):
@@ -462,6 +472,10 @@ class fight_scene(thing):
                 self.ai(p)
             else:
                 self.action_menu(self.players()[0])
+    def moving_piece(self,x):
+        for p in self.participants:
+            if p.target == x:
+                p.reset_hit_region()
     def clear_targets(self):
         for p in self.participants:
             if p.target not in self.participants:
