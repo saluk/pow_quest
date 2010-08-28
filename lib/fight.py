@@ -147,6 +147,8 @@ class realchar(thing):
         self.hit_region = hit_region(start=self.pos,end=self.pos,band=30)
         self.hovering = False
         self.display_stats = border_textbox("",self.pos)
+    def region(self):
+        return self.sprite.region()
     def mouse_over(self,pos):
         self.hovering = False
         cp,s = self.sprite.region()
@@ -453,17 +455,12 @@ class fight_scene(thing):
         #Iterate through participants in order of distance until we hit it
         tp = char.target.pos
         for shot in range(char.weapon.stats["shots"]):
-            i = 0
             target = None
             shoot_path,shoot_angle = char.hit_region.random_line()
             for part in sorted(obs,key=lambda x: x.dist):
                 if part == char:
                     continue
-                i+=1
-                w,h = [10,10]
-                x = part.pos[0]-w//2
-                y = part.pos[1]-h//2
-                hit_pos = line_box(shoot_path,[[x,y],[w,h]])
+                hit_pos = line_box(shoot_path,part.region())
                 if hit_pos:
                     target = part
                     break
