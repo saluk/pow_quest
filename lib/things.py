@@ -224,6 +224,8 @@ class enemy_char(char):
             return True
     def update(self,dt):
         super(enemy_char,self).update(dt)
+        if self.kill:
+            return
         if self.can_see(pygame.player):
             from fight import fight_scene
             obs = [x for x in pygame.scene.sprites.children if x not in pygame.scene.enemies and x not in [pygame.player]]

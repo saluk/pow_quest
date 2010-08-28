@@ -391,6 +391,8 @@ class fight_scene(thing):
         
         self.goodies = goodies
         for good in goodies:
+            if good.kill:
+                return
             spot = choose_closest_to(good,[x for x in self.spots.values() if not x.contains])
             player = realchar()
             player.fight_scene = self
@@ -406,6 +408,8 @@ class fight_scene(thing):
         
         self.enemies = enemies
         for enemy in enemies:
+            if enemy.kill:
+                return
             spot = choose_closest_to(enemy,[x for x in self.spots.values() if not x.contains])
             stats = enemy.stats
             enemy = realchar()

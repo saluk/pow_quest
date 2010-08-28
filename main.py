@@ -121,7 +121,8 @@ scene.children.append(bunker)
 man = player_char("army",[160,60])
 man.stats = pygame.all_stats["player"]
 pygame.player = man
-load_scene("start",man)
+pygame.player.update(1)
+load_scene("jail",man)
 scene.sprites.children.append(man)
 
 scene.children.append(entry_box(">",[160,140]))
