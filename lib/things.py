@@ -352,6 +352,13 @@ class item(sprite):
             else:
                 self.char.armor[d["position"]] = None
             return "changed armor"
+        if d["type"]=="restore":
+            if self.char.hp>=self.char.stats["maxhp"]:
+                return
+            self.char.hp+=d["amount"]
+            if self.char.hp>self.char.stats["maxhp"]:
+                self.char.hp = self.char.stats["maxhp"]
+            self.char.inventory.remove(d["tag"])
     def pickup(self):
         if not self in pygame.scene.clickable:
             return
