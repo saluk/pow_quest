@@ -6,11 +6,12 @@ import pygame.mixer
 pygame.mixer.init()
 
 from lib.things import *
-from lib.fight import *
 
 res = [800,600]
 fs = 0
 screen = pygame.display.set_mode(res,pygame.FULLSCREEN*fs)
+
+from lib.fight import *
 
 surf = pygame.Surface([320,200])
 pygame.mainfont = pygame.font.Font("fonts/lucon.ttf",7)

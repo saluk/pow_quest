@@ -260,6 +260,7 @@ class action_menu(menu):
             if character.target:
                 self.options.append("aim")
                 self.options.append("shoot")
+        self.options.append("grenade")
         if character.spot.can_move():
             self.options.append("move")
     def move(self):
@@ -268,6 +269,8 @@ class action_menu(menu):
         pygame.fight_scene.target_menu(self.character)
     def shoot(self):
         pygame.fight_scene.shoot_menu(self.character)
+    def grenade(self):
+        pygame.fight_scene.grenade_menu(self.character)
     def aim(self):
         self.character.aim()
         pygame.fight_scene.next()
@@ -295,6 +298,17 @@ class move_menu(thing):
                 self.char.set_spot(s)
                 pygame.fight_scene.next()
                 return True
+                
+class grenade_menu(thing):
+    def __init__(self,char):
+        super(grenade_menu,self).__init__()
+        self.children = []
+        self.char = char
+    def mouse_click(self,pos,mode):
+        pygame.fight_scene.grenade({"range":200,"damage":15},pos)
+        self.kill = 1
+        pygame.fight_scene.next()
+        return True
                 
 class target_menu(thing):
     def __init__(self,char,chars):
@@ -443,6 +457,8 @@ class fight_scene(thing):
         self.menus.children = [move_menu(char)]
     def target_menu(self,char):
         self.menus.children = [target_menu(char,self.participants)]
+    def grenade_menu(self,char):
+        self.menus.children = [grenade_menu(char)]
     def shoot_menu(self,char):
         self.menus.children = []
         self.shoot(char)
@@ -496,10 +512,59 @@ class fight_scene(thing):
                     while target in self.turns:
                         self.turns.remove(target)
             self.shot_line([char.pos,hit_pos],0.5,"",after)
+    def grenade(self,stats,pos):
+        p = pos
+        obs = self.participants + self.debris
+        #Sort participants by range
+        for part in obs:
+            tp = part.pos
+            d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
+            part.dist = d
+        #Iterate through participants, see if we hit them
+        hit = []
+        for aim_for in self.participants:
+            target = None
+            hr = hit_region(p,aim_for.pos)
+            shoot_angle = hr.target_angle
+            shoot_path = make_line(p,shoot_angle,stats["range"])
+            for part in sorted(obs,key=lambda x: x.dist):
+                if part == char:
+                    continue
+                hit_pos = line_box(shoot_path,part.region())
+                if hit_pos:
+                    if part not in hit:
+                        hit.append(part)
+                    break
+        if not hit:
+            self.shot_line(shoot_path,0.5,"Miss")
+            return
+        for target in hit:
+            tp = target.pos
+            angle = hit_region(p,tp).target_angle
+            if not hasattr(target,"hp"):
+                self.shot_line([p,tp],0.5,"Blocked!")
+                continue
+            damage = stats["damage"]
+            def after(sl,damage=damage,target=target,self=self):
+                damage = target.damage(damage)
+                sl.popup_text = str(damage)
+                if target.hp<=0:
+                    target.set_spot(None)
+                    if target in self.participants:
+                        self.participants.remove(target)
+                    for p in self.participants:
+                        if p.target == target:
+                            p.target = None
+                    while target in self.turns:
+                        self.turns.remove(target)
+            self.shot_line([p,tp],0.5,"",after)
     def update(self,dt):
         "Update timers if no interface is up"
         super(fight_scene,self).update(dt)
         if [x for x in self.children if getattr(x,"block",False)]:
+            return
+        self.finish()
+        if not self.turns:
             return
         nt = self.turns[0]
         if hasattr(nt,"startswith") and nt.startswith("wait"):
@@ -516,7 +581,6 @@ class fight_scene(thing):
                 self.ai(p)
             else:
                 self.action_menu(self.players()[0])
-        self.finish()
     def moving_piece(self,x):
         for p in self.participants:
             if p.target == x:
@@ -526,6 +590,9 @@ class fight_scene(thing):
             if p.target not in self.participants:
                 p.target = None
     def finish(self):
+        if not [x for x in self.participants if not x.enemy]:
+            print "you lose"
+            sys.exit()
         if not [x for x in self.participants if x.enemy]:
             for e in self.enemies:
                 e.kill = 1
@@ -533,9 +600,6 @@ class fight_scene(thing):
             self.goodies[0].hp = self.participants[0].hp
             pygame.scene.children = self.restore_children
             pygame.play_music("chips/YIFFY.IT")
-        if not [x for x in self.participants if not x.enemy]:
-            print "you lose"
-            sys.exit()
 
     def players(self):
         return [x for x in self.participants if not x.enemy]

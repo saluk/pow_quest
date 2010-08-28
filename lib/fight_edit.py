@@ -98,6 +98,8 @@ class edit(thing):
             self.connections.remove(s)
         else:
             self.connections.append(s)
+    def mouse_over(self,pos):
+        print pos
     def draw(self,surf):
         for c in self.connections:
             pygame.draw.line(surf,[155,0,155],c[0],c[1])
