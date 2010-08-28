@@ -59,4 +59,8 @@
         "map":"kitchen",
         "fight":"fight5"
     },
+    "lobby":{
+        "map":"lobby",
+        "fight":"fight6"
+    },
 }
