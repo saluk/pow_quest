@@ -316,14 +316,18 @@ class door(sprite):
     def mouse_click(self,pos,mode):
         if not self in pygame.scene.clickable:
             return
+        if self.data.get("switchdoor",None):
+            return
         c = self
         w,h = self.surf.get_size()
         if pos[0]>=c.pos[0] and pos[0]<=c.pos[0]+w and pos[1]>=c.pos[1] and pos[1]<=c.pos[1]+h:
-            if self.state == "closed":
-                self.state = "open"
-            elif self.state == "open":
-                self.state = "closed"
-            self.set_facing()
+            self.toggle()
+    def toggle(self):
+        if self.state == "closed":
+            self.state = "open"
+        elif self.state == "open":
+            self.state = "closed"
+        self.set_facing()
             
 class switch(sprite):
     def __init__(self,*args):
@@ -337,11 +341,9 @@ class switch(sprite):
         if pos[0]>=c.pos[0] and pos[0]<=c.pos[0]+w and pos[1]>=c.pos[1] and pos[1]<=c.pos[1]+h:
             for ob in pygame.all_objects:
                 print ob.data
-                if ob.data.get("switchdoor",None):
-                    ob.state = "open"
-                    ob.set_facing()
+                if ob.data.get("switchdoor",None)==self.tag:
+                    ob.toggle()
                     pygame.scene.children.append(border_textbox("You hear a click somewhere",[0,0],160,timeout=3))
-                    self.kill = 1
             
 class item(sprite):
     def __init__(self,tag,pos,char,world=False,stats={}):
