@@ -256,7 +256,7 @@ class enemy_char(char):
             self.next_choice = random.randint(3,6)
             
 
-level_defs = [(10,{"reaction":1,"accuracy":1}),(20,{"maxhp":5,"accuracy":1,"armor":1}),(50,{"maxhp":10,"accuracy":1,"armor":1}),(125,{"reaction":2,"armor":1,"accuracy":1}),(200,{"accuracy":2,"reaction":2}),(300,{"armor":1,"maxhp":10})]
+level_defs = [(10,{"reaction":1,"accuracy":1}),(20,{"maxhp":5,"accuracy":1,"armor":1}),(60,{"maxhp":10,"accuracy":1,"armor":1}),(105,{"reaction":2,"armor":1,"accuracy":1}),(140,{"accuracy":2,"reaction":2}),(200,{"armor":1,"maxhp":10})]
         
 class player_char(char):
     frob_range = 15
@@ -385,6 +385,8 @@ class item(sprite):
                     v = "gas"
                     s = "effect"
                 t+="\n"+s+": "+str(v)
+            if not self.world:
+                t+="\nCount:%s"%self.char.inventory.count(self.tag)
             self.children = [border_textbox(t,[self.pos[0],self.pos[1]],maxy=self.pos[1])]
     def execute(self):
         d = {}
@@ -456,7 +458,7 @@ class inventory_menu(thing):
         if self.char.inventory != self.last_invlist:
             self.children = []
             x,y = self.pos
-            for o in self.char.inventory:
+            for o in set(self.char.inventory):
                 i = item(o,[x,y+3],self.char,False,pygame.all_items[o])
                 i.parent = self
                 self.children.append(i)
