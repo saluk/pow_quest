@@ -37,7 +37,7 @@ class thing(object):
                 return True
 
 class textbox(thing):
-    def __init__(self,text,pos,width=150,maxy=200,miny=0):
+    def __init__(self,text,pos,width=150,maxy=200,miny=0,timeout=None):
         super(textbox,self).__init__()
         self.lines = []
         self.to_print = list(text)
@@ -49,8 +49,14 @@ class textbox(thing):
         self.height = 0
         self.maxy = maxy
         self.miny = miny
+        self.timeout = timeout
     def update(self,dt):
         if not self.to_print:
+            if self.timeout != None:
+                self.timeout -= dt
+                print self.timeout
+                if self.timeout<=0:
+                    self.kill = 1
             return
         self.height = 0
         self.next -= dt
@@ -91,6 +97,7 @@ class quick_textbox(textbox):
     def update(self,dt):
         while self.to_print:
             super(quick_textbox,self).update(5)
+        super(quick_textbox,self).update(dt)
             
 class border_textbox(quick_textbox):
     def predraw(self,surf):
@@ -317,6 +324,24 @@ class door(sprite):
             elif self.state == "open":
                 self.state = "closed"
             self.set_facing()
+            
+class switch(sprite):
+    def __init__(self,*args):
+        super(switch,self).__init__(*args)
+        self.actions = ["push"]
+    def mouse_click(self,pos,mode):
+        if not self in pygame.scene.clickable:
+            return
+        c = self
+        w,h = self.surf.get_size()
+        if pos[0]>=c.pos[0] and pos[0]<=c.pos[0]+w and pos[1]>=c.pos[1] and pos[1]<=c.pos[1]+h:
+            for ob in pygame.all_objects:
+                print ob.data
+                if ob.data.get("switchdoor",None):
+                    ob.state = "open"
+                    ob.set_facing()
+                    pygame.scene.children.append(border_textbox("You hear a click somewhere",[0,0],160,timeout=3))
+                    self.kill = 1
             
 class item(sprite):
     def __init__(self,tag,pos,char,world=False,stats={}):

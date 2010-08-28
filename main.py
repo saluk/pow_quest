@@ -132,6 +132,8 @@ for o in eval(open("data/objects.txt").read()):
         ob = item(o["type"],pos,False,True,pygame.all_items[o["type"]])
     if o["type"] == "crate":
         ob = sprite("art/crate.png",pos)
+    if o["type"] == "switch":
+        ob = switch("art/redbutton.png",pos)
     if o["type"].startswith("4waydoor"):
         ob = door(o["type"],pos,"closed")
     if ob:
@@ -139,6 +141,7 @@ for o in eval(open("data/objects.txt").read()):
         obs = pygame.scene_data[o["scene"]].get("obs",[])
         obs.append(ob)
         pygame.scene_data[o["scene"]]["obs"] = obs
+        pygame.all_objects.append(ob)
 
 bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)

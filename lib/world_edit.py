@@ -61,7 +61,7 @@ class add_menu(menu):
     def __init__(self,parent):
         super(add_menu,self).__init__([50,0],150)
         self.parent = parent
-        self.options = ["door","doorbars","crate","4waydoor_w","4waydoor_e","4waydoor_s","4waydoor_n"]
+        self.options = ["door","doorbars","crate","4waydoor_w","4waydoor_e","4waydoor_s","4waydoor_n","switch"]
         self.options.extend(pygame.all_stats.keys())
         self.options.extend(self.parent.items.keys())
     def execute(self,option):
@@ -151,6 +151,9 @@ class game_door(editor_ob,door):
             
 class game_item(editor_ob,item):
     pass
+    
+class game_switch(editor_ob,switch):
+    pass
 
 class edit(thing):
     def __init__(self,children,scene_name):
@@ -194,6 +197,8 @@ class edit(thing):
             ob = game_door("doorbars",pos)
             if not o.get("destination",None):
                 o["destination"] = {"scene":None,"pos":[0,0]}
+        if o["type"] == "switch":
+            ob = game_switch("art/redbutton.png",pos)
         if o["type"] in self.items.keys():
             ob = game_item(o["type"],pos,None,True)
             ob.stats = self.items[o["type"]]
