@@ -400,7 +400,7 @@ class ending(textbox):
         #~ super(ending,self).draw(surf)
         
 class fight_scene(thing):
-    def __init__(self,restore_children,goodies,enemies,bg,fight,objects):
+    def __init__(self,restore_children,goodies,enemies,bg,fight,objects,play_music=True):
         
         super(fight_scene,self).__init__()
         pygame.fight_scene = self
@@ -462,7 +462,8 @@ class fight_scene(thing):
         self.menus = thing()
         self.children.append(self.menus)
         self.turns = []
-        pygame.play_music("chips/rontomo.s3m")
+        if play_music:
+            pygame.play_music("chips/rontomo.s3m")
         self.finished = False
         self.calc_turns()
         self.collide_points = []

@@ -126,6 +126,8 @@ for o in eval(open("data/objects.txt").read()):
         ob.is_enemy = True
     if o["type"] == "door":
         ob = door("door1",pos,"closed")
+    if o["type"] == "doorbars":
+        ob = door("doorbars",pos,"closed")
     if o["type"] in pygame.all_items:
         ob = item(o["type"],pos,False,True,pygame.all_items[o["type"]])
     if o["type"] == "crate":
@@ -139,11 +141,11 @@ for o in eval(open("data/objects.txt").read()):
 bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
 
-man = player_char("army",[160,60])
+man = player_char("army",[129,152])
 man.stats = pygame.all_stats["player"]
 pygame.player = man
 pygame.player.update(1)
-load_scene("start",man)
+load_scene("cell",man)
 scene.sprites.children.append(man)
 
 scene.children.append(entry_box(">",[160,140]))
@@ -158,8 +160,9 @@ def col(man):
         r,ss = s.region()
         if p[0]>=r[0] and p[0]<=r[0]+ss[0] and p[1]>=r[1] and p[1]<=r[1]+ss[1]:
             if s.data.get("destination",None) and s.state=="open":
-                load_scene(s.data["destination"]["scene"],man)
-                man.pos = s.data["destination"]["pos"][:]
+                if s.data["destination"]["scene"]:
+                    load_scene(s.data["destination"]["scene"],man)
+                    man.pos = s.data["destination"]["pos"][:]
                 return False
             return True
     bg = pygame.bg.surf

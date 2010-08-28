@@ -37,7 +37,7 @@ class add_menu(menu):
     def __init__(self,parent):
         super(add_menu,self).__init__([50,0],150)
         self.parent = parent
-        self.options = ["door","crate"]
+        self.options = ["door","doorbars","crate"]
         self.options.extend(pygame.all_stats.keys())
         self.options.extend(self.parent.items.keys())
     def execute(self,option):
@@ -158,6 +158,8 @@ class edit(thing):
             ob = game_sprite("art/crate.png",pos)
         if o["type"] == "door":
             ob = game_door("door1",pos)
+        if o["type"] == "doorbars":
+            ob = game_door("doorbars",pos)
         if o["type"] in self.items.keys():
             ob = game_item(o["type"],pos,None,True)
             ob.stats = self.items[o["type"]]

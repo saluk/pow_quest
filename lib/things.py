@@ -212,16 +212,20 @@ class enemy_char(char):
             if self.can_see(o):
                 return True
     def can_see(self,ob):
-        rise = self.pos[0]-ob.pos[0]
-        run = self.pos[1]-ob.pos[1]
-        ang = math.atan2(run,rise)*180.0/math.pi
-        curang = {"e":0,"n":90,"w":180,"s":270}[self.facing]
-        while ang<0:
-            ang+=360
-        if ang<curang:
-            ang,curang = curang,ang
-        if ang-curang<60:
-            return True
+        import fight
+        xx = fight.fight_scene(None,[ob],[self],thing(),pygame.cur_scene["fight"],[],False)
+        hit = xx.hit_region_collide(fight.hit_region(self.pos,ob.pos,range=2000),ignore=[self])
+        if hit and hit[0]=="part":
+            rise = self.pos[0]-ob.pos[0]
+            run = self.pos[1]-ob.pos[1]
+            ang = math.atan2(run,rise)*180.0/math.pi
+            curang = {"e":0,"n":90,"w":180,"s":270}[self.facing]
+            while ang<0:
+                ang+=360
+            if ang<curang:
+                ang,curang = curang,ang
+            if ang-curang<60:
+                return True
     def update(self,dt):
         super(enemy_char,self).update(dt)
         if self.kill:

@@ -105,8 +105,7 @@ class edit_menu(menu):
         fm.parent = self.parent
         self.parent.children.append(fm)
     def clear(self):
-        self.parent.points = []
-        self.parent.connections = []
+        self.parent.data = {"points":[],"connections":[],"wall_points":[],"wall_connections":[]}
     def exit(self):
         self.parent.finish()
 
