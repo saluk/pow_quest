@@ -147,6 +147,7 @@ class realchar(thing):
         self.target = None
         self.hit_region = hit_region(start=self.pos,end=self.pos,band=30)
         self.hovering = False
+        self.display_stats = border_textbox("",self.pos)
     def mouse_over(self,pos):
         self.hovering = False
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+self.sprite.surf.get_width() and\
@@ -160,16 +161,36 @@ class realchar(thing):
         if self.target:
             if not self.enemy or self.hovering:
                 self.hit_region.draw(surf)
+        if self.hovering:
+            text = ""
+            for s in self.stats:
+                if s in ["type"]:
+                    continue
+                cur = self.stats[s]
+                real = self.get_stat(s)
+                if cur==real:
+                    text+="%s: %s\n"%(s,cur)
+                else:
+                    text+="%s: %s(%s)\n"%(s,cur,real)
+            self.display_stats.lines = []
+            self.display_stats.to_print = list(text)
+            if self.display_stats not in self.children:
+                self.children.append(self.display_stats)
+        else:
+            if self.display_stats in self.children:
+                self.children.remove(self.display_stats)
     def set_spot(self,spot):
         if self.spot:
             self.spot.contains = None
+            if self.sprite in self.children:
+                self.children.remove(self.sprite)
         self.children = []
         if not spot:
             return
         if not spot.contains:
             spot.contains = self
             self.spot = spot
-            self.children = [self.sprite]
+            self.children.append(self.sprite)
             self.pos = self.sprite.pos = self.spot.pos
         return self
     def reset_hit_region(self):
