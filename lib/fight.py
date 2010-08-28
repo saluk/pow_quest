@@ -372,6 +372,23 @@ class shot_line(thing):
     def draw(self,surf):
         pygame.draw.line(surf,[255,0,0],self.start,self.pen)
         
+class ending(textbox):
+    def __init__(self,text,after):
+        self.cooldown = 2
+        super(ending,self).__init__(text,[0,0])
+        self.after = after
+    def update(self,dt):
+        super(ending,self).update(dt)
+        if self.to_print:
+            return
+        self.cooldown -= dt
+        if self.cooldown<=0:
+            self.kill = 1
+            self.after()
+    #~ def draw(self,surf):
+        #~ surf.fill([0,0,0])
+        #~ super(ending,self).draw(surf)
+        
 class fight_scene(thing):
     def __init__(self,restore_children,goodies,enemies,bg,fight,objects):
         
@@ -431,6 +448,7 @@ class fight_scene(thing):
         self.children.append(self.menus)
         self.turns = []
         pygame.play_music("chips/rontomo.s3m")
+        self.finished = False
         self.calc_turns()
     def load_spots_from_file(self,file):
         self.spots = {}
@@ -567,8 +585,11 @@ class fight_scene(thing):
         super(fight_scene,self).update(dt)
         if [x for x in self.children if getattr(x,"block",False)]:
             return
+        if self.finished:
+            return
         self.finish()
         if not self.turns:
+            self.calc_turns()
             return
         nt = self.turns[0]
         if hasattr(nt,"startswith") and nt.startswith("wait"):
@@ -595,15 +616,30 @@ class fight_scene(thing):
                 p.target = None
     def finish(self):
         if not [x for x in self.participants if not x.enemy]:
+            self.finished = True
             print "you lose"
             sys.exit()
         if not [x for x in self.participants if x.enemy]:
             for e in self.enemies:
                 e.kill = 1
-            self.goodies[0].pos = self.participants[0].pos
-            self.goodies[0].hp = self.participants[0].hp
-            pygame.scene.children = self.restore_children
-            pygame.play_music("chips/YIFFY.IT")
+            player = self.goodies[0]
+            player.pos = self.participants[0].pos
+            player.hp = self.participants[0].hp
+            pygame.play_music("chips/kupla.it")
+            def after():
+                pygame.scene.children = self.restore_children
+                print "playing yiffy...."
+                pygame.play_music("chips/YIFFY.IT")
+            text = "You have killed the opposition... For now.\n"
+            xp = sum([x.stats["xp"] for x in self.enemies])
+            text += "You have earned %s xp.\n"%xp
+            for e in self.enemies:
+                if random.randint(0,10)>8:
+                    item = random.choice(["bandaid"]*3 + ["bulletvest"]*1)
+                    text += "You also found an %s!\n"%item
+                    player.inventory.append(item)
+            self.children.append(ending(text,after))
+            self.finished = True
 
     def players(self):
         return [x for x in self.participants if not x.enemy]

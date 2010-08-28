@@ -64,6 +64,7 @@ def debug_menu():
 
 def play_music(x):
     if hasattr(pygame,"cur_music"):
+        print x,pygame.cur_music
         if pygame.cur_music==x:
             return
     pygame.cur_music = x
