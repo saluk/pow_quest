@@ -334,7 +334,11 @@ class item(sprite):
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
             t = self.tag
             for s in sorted(self.stats):
-                t+="\n"+s+": "+str(self.stats[s])
+                v = self.stats[s]
+                if s == "buff":
+                    v = "gas"
+                    s = "effect"
+                t+="\n"+s+": "+str(v)
             self.children = [border_textbox(t,[self.pos[0],self.pos[1]],maxy=self.pos[1])]
     def execute(self):
         d = {}

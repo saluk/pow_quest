@@ -619,7 +619,7 @@ class fight_scene(thing):
             if h:
                 hit.append(h)
         if not hit:
-            self.shot_line(shoot_path,0.5,"Miss")
+            self.shot_line(hr.to_line(),0.5,"Miss")
             return
         for h in hit:
             target = h[1]
@@ -719,7 +719,7 @@ class fight_scene(thing):
                     item = random.choice(["bandaid"]*3 + ["bulletvest"]*1)
                     text += "You also found an %s!\n"%item
                     player.inventory.append(item)
-            self.children.append(ending(text,after))
+            self.children = [ending(text,after)]
             self.finished = True
 
     def players(self):
