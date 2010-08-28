@@ -15,4 +15,44 @@
         "map":"4way",
         "fight":"fight4"
     },
+    "cell_se":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "cell_see":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "cell_sesww":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "cell_sesw":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "cell_ses":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "cell_sees":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "cell_seese":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "cell_sess":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "cell_seess":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "cell_seesse":{
+        "map":"4way",
+        "fight":"fight4"
+    },
 }
