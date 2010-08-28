@@ -359,6 +359,7 @@ class item(sprite):
             if self.char.hp>self.char.stats["maxhp"]:
                 self.char.hp = self.char.stats["maxhp"]
             self.char.inventory.remove(d["tag"])
+            return "used bandaid"
     def pickup(self):
         if not self in pygame.scene.clickable:
             return

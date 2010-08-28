@@ -554,6 +554,10 @@ class fight_scene(thing):
                     while target in self.turns:
                         self.turns.remove(target)
             self.shot_line([char.pos,hit_pos],0.5,"",after)
+    #~ def throw_grenade(self,stats,char,pos):
+        #~ hr = hit_region(char.pos,pos)
+        #~ shoot_angle = hr.target_angle
+        #~ shoot_path = make_line(p,shoot_angle,stats["range"])
     def grenade(self,stats,pos):
         p = pos
         obs = self.participants + self.debris
@@ -569,13 +573,15 @@ class fight_scene(thing):
             hr = hit_region(p,aim_for.pos)
             shoot_angle = hr.target_angle
             shoot_path = make_line(p,shoot_angle,stats["range"])
+            hit_wall,hitd = self.hit_wall(shoot_path)
             for part in sorted(obs,key=lambda x: x.dist):
                 if part == char:
                     continue
                 hit_pos = line_box(shoot_path,part.region())
                 if hit_pos:
-                    if part not in hit:
-                        hit.append(part)
+                    if not hit_wall or (hitd>(p[0]-hit_pos[0])**2+(p[1]-hit_pos[1])**2):
+                        if part not in hit:
+                            hit.append(part)
                     break
         if not hit:
             self.shot_line(shoot_path,0.5,"Miss")
