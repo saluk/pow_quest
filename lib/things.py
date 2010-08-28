@@ -309,9 +309,9 @@ class item(sprite):
     def mouse_click(self,pos,mode):
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
             if not self.world:
-                self.execute()
+                return self.execute()
             else:
-                self.pickup()
+                return self.pickup()
     def mouse_over(self,pos):
         self.children = []
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
@@ -328,17 +328,20 @@ class item(sprite):
                 self.char.weapon = d
             else:
                 self.char.weapon = None
+            return "changed weapon"
         if d["type"]=="armor":
             if not self.char.armor[d["position"]] or self.char.armor[d["position"]]["tag"] != self.tag:
                 self.char.armor[d["position"]] = d
             else:
                 self.char.armor[d["position"]] = None
+            return "changed armor"
     def pickup(self):
         if not self in pygame.scene.clickable:
             return
         if not self.kill:
             self.kill = 1
             pygame.player.inventory.append(self.tag)
+        return "picked up"
     def predraw(self,surf):
         self.draw_box(surf)
         self.draw_item(surf)
@@ -386,8 +389,10 @@ class fight_inventory_menu(inventory_menu):
         self.fight_scene = fight_scene
     def mouse_click(self,pos,mode):
         if self.fight_scene.inv_ok:
-            super(fight_inventory_menu,self).mouse_click(pos,mode)
-            self.fight_scene.next()
+            pickup = super(fight_inventory_menu,self).mouse_click(pos,mode)
+            if pickup:
+                self.char.reset_hit_region()
+                self.fight_scene.next()
     def draw(self,surf):
         if self.fight_scene.inv_ok:
             pygame.draw.line(surf,[255,255,255],[0,183],[320,183])

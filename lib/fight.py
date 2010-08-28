@@ -204,6 +204,8 @@ class realchar(thing):
             self.fight_scene.moving_piece(self)
         return self
     def reset_hit_region(self):
+        if not self.weapon:
+            self.weapon = {"range":50,"damage":2,"accuracy":4,"tag":"hands"}
         self.hit_region.start_pos = self.pos[:]
         if self.target:
             self.hit_region.target_pos = self.target.pos[:]
@@ -469,6 +471,7 @@ class fight_scene(thing):
         self.next_mode = 1
     def next(self):
         self.turn_start = True
+        self.inv_ok = False
         self.menus.children = []
         if self.turns:
             del self.turns[0]
