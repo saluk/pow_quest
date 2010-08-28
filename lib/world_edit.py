@@ -188,16 +188,19 @@ class edit(thing):
             ob = game_sprite("art/crate.png",pos)
         if o["type"] == "door":
             ob = game_door("door1",pos)
-            o["destination"] = {"scene":None,"pos":[0,0]}
+            if not o.get("destination",None):
+                o["destination"] = {"scene":None,"pos":[0,0]}
         if o["type"] == "doorbars":
             ob = game_door("doorbars",pos)
-            o["destination"] = {"scene":None,"pos":[0,0]}
+            if not o.get("destination",None):
+                o["destination"] = {"scene":None,"pos":[0,0]}
         if o["type"] in self.items.keys():
             ob = game_item(o["type"],pos,None,True)
             ob.stats = self.items[o["type"]]
         if o["type"].startswith("4waydoor"):
             ob = game_door(o["type"],pos)
-            o["destination"] = {"scene":None,"pos":[0,0]}
+            if not o.get("destination",None):
+                o["destination"] = {"scene":None,"pos":[0,0]}
         if ob:
             ob.parent = self
             ob.data = o
