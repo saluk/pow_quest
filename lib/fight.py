@@ -252,8 +252,7 @@ class realchar(thing):
 class action_menu(menu):
     """The fighting menu for a person"""
     def __init__(self,character):
-        x,y = character.pos
-        x+=16
+        x,y = [256,142]
         super(action_menu,self).__init__([x,y],60)
         self.character = character
         self.init_options()
@@ -643,7 +642,7 @@ class fight_scene(thing):
                                 p.target = None
                         while target in self.turns:
                             self.turns.remove(target)
-                if stats["buff"]:
+                if stats.get("buff",None):
                     target.buff = stats["buff"].copy()
                     sl.popup_text = "Gassed!"
             self.shot_line([p,tp],0.5,"",after)
