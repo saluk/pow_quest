@@ -694,8 +694,9 @@ class fight_scene(thing):
     def finish(self):
         if not [x for x in self.participants if not x.enemy]:
             self.finished = True
-            print "you lose"
-            sys.exit()
+            player = self.goodies[0]
+            player.pos = [129,152]
+            pygame.scene.load_scene("cell",player)
         if not [x for x in self.participants if x.enemy]:
             for e in self.enemies:
                 e.kill = 1
@@ -718,7 +719,7 @@ class fight_scene(thing):
                 for c in l:
                     text += "%s: %s -> %s\n"%(c)
             for e in self.enemies:
-                if random.randint(0,10)>8:
+                if random.randint(0,10)>7:
                     item = random.choice(["bandaid"]*5 + ["bulletvest"]*1 + ["grenade"]*1 + ["smokegrenade"]*1)
                     text += "You also found an %s!\n"%item
                     player.inventory.append(item)

@@ -38,6 +38,9 @@ class game_scene(thing):
             obs = [x for x in self.sprites.children if x not in enemies and x not in players and not x.kill]
             self.children = [fight_scene(self.children,players,enemies,pygame.bg,pygame.cur_scene["fight"],obs)]
             self.make_fight = False
+    def load_scene(self,scene,char):
+        global load_scene
+        load_scene(scene,char)
 
 scene = game_scene()
 pygame.scene = scene
@@ -164,7 +167,8 @@ with them. The inventory on the bottom will let you use
 healing and equip or unequip items. If the enemy spots you
 you will have to fight! First, to escape your prison...
 
-You have heard rumors of a hidden switch inside the brick walls.""",[0,100],width=300,timeout=10))
+You have heard rumors of a hidden switch inside the brick walls.
+(click to exit)""",[0,100],width=300,timeout=10))
 
 bgcolor = (215,196,146)
 def col(man):

@@ -51,11 +51,14 @@ class textbox(thing):
         self.maxy = maxy
         self.miny = miny
         self.timeout = timeout
+    def mouse_click(self,pos,mode):
+        print "clicking"
+        self.clicked = True
     def update(self,dt):
         if not self.to_print:
             if self.timeout != None:
                 self.timeout -= dt
-                if self.timeout<=0:
+                if self.timeout<=0 or getattr(self,"clicked",None):
                     self.kill = 1
             return
         self.height = 0
@@ -253,7 +256,7 @@ class enemy_char(char):
             self.next_choice = random.randint(3,6)
             
 
-level_defs = [(10,{"reaction":1}),(20,{"accuracy":1,"armor":1}),(32,{"maxhp":10,"accuracy":1,"armor":1}),(53,{"reaction":2,"armor":1,"accuracy":1}),(97,{"accuracy":2,"reaction":2}),(125,{"armor":1,"maxhp":10})]
+level_defs = [(10,{"reaction":1,"accuracy":1}),(20,{"maxhp":5,"accuracy":1,"armor":1}),(50,{"maxhp":10,"accuracy":1,"armor":1}),(125,{"reaction":2,"armor":1,"accuracy":1}),(200,{"accuracy":2,"reaction":2}),(300,{"armor":1,"maxhp":10})]
         
 class player_char(char):
     frob_range = 15
