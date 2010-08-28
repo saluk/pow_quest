@@ -305,7 +305,7 @@ class grenade_menu(thing):
         self.children = []
         self.char = char
     def mouse_click(self,pos,mode):
-        pygame.fight_scene.grenade({"range":200,"damage":15},pos)
+        pygame.fight_scene.grenade({"range":60,"damage":15},pos)
         self.kill = 1
         pygame.fight_scene.next()
         return True

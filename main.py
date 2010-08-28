@@ -19,7 +19,19 @@ bg = pygame.image.load("design/mockup.png")
 
 pygame.timer = pygame.time.Clock()
 
-scene = thing()
+class game_scene(thing):
+    make_fight = False
+    def update(self,dt):
+        super(game_scene,self).update(dt)
+        if self.make_fight:
+            enemies = [x for x in self.enemies if not x.kill]
+            players = [x for x in [pygame.player] if not x.kill]
+            obs = [x for x in self.sprites.children if x not in enemies and x not in players and not x.kill]
+            self.children = [fight_scene(self.children,players,enemies,pygame.bg,pygame.cur_scene["fight"],obs)]
+            self.make_fight = False
+            
+
+scene = game_scene()
 pygame.scene = scene
 pygame.gui = thing()
 game = thing()
@@ -122,7 +134,7 @@ man = player_char("army",[160,60])
 man.stats = pygame.all_stats["player"]
 pygame.player = man
 pygame.player.update(1)
-load_scene("jail",man)
+load_scene("start",man)
 scene.sprites.children.append(man)
 
 scene.children.append(entry_box(">",[160,140]))
