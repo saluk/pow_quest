@@ -87,6 +87,7 @@ f = open("data/scenes.txt")
 pygame.scene_data = eval(f.read())
 
 pygame.all_items = eval(open("data/items.txt").read())
+pygame.all_stats = eval(open("data/stats.txt").read())
 
 pygame.all_objects = []
 for o in eval(open("data/objects.txt").read()):
@@ -95,8 +96,9 @@ for o in eval(open("data/objects.txt").read()):
         pos = [random.randint(40,140),random.randint(40,140)]
     else:
         pos = o["pos"]
-    if o["type"] == "enemy":
+    if o["type"] in pygame.all_stats:
         ob = enemy_char("army",pos)
+        ob.stats = pygame.all_stats[o["type"]]
         ob.is_enemy = True
     if o["type"] == "door":
         ob = door("door1",pos,"closed")

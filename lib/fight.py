@@ -155,7 +155,7 @@ class realchar(thing):
             return True
     def draw(self,surf):
         self.health_bar.pos = [self.sprite.pos[0]+5,self.sprite.pos[1]+5]
-        self.health_bar.lines = ["%s/30"%self.hp]
+        self.health_bar.lines = ["%s/%s"%(self.hp,self.stats["maxhp"])]
         self.health_bar.draw(surf)
         if self.target:
             if not self.enemy or self.hovering:
@@ -354,7 +354,10 @@ class fight_scene(thing):
         self.enemies = enemies
         for enemy in enemies:
             spot = choose_closest_to(enemy,[x for x in self.spots.values() if not x.contains])
+            stats = enemy.stats
             enemy = realchar().set_spot(spot)
+            enemy.stats = stats
+            enemy.hp = stats["maxhp"]
             enemy.weapon = gun()
             enemy.enemy = True
             enemy.stats["accuracy"] = 0
