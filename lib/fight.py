@@ -132,11 +132,11 @@ class realchar(thing):
         focus - how many degrees are lost when things make you lose degrees,
                    how long to charge spells"""
         super(realchar,self).__init__()
-        self.stats = {"maxhp":30,"reaction":5,"accuracy":1,"armor":1}
+        self.stats = {"maxhp":30,"reaction":5,"accuracy":1,"armor":1,"weapon":"hands"}
         self.hp = 30
         self.pos = [0,0]
         self.spot = None
-        self.weapon = None
+        self.weapon = weapon({"range":50,"damage":2,"accuracy":4})
         self.armor = {"chest":None,"legs":None,"head":None}
         #Chest is up to 0.5 coverage, legs are 0.2 and head is 0.25
         self.sprite = char("army",[100,100])
@@ -150,8 +150,9 @@ class realchar(thing):
         self.display_stats = border_textbox("",self.pos)
     def mouse_over(self,pos):
         self.hovering = False
-        if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+self.sprite.surf.get_width() and\
-            pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+self.sprite.surf.get_height():
+        cp,s = self.sprite.region()
+        if pos[0]>=cp[0] and pos[0]<=cp[0]+s[0] and\
+            pos[1]>=cp[1] and pos[1]<=cp[1]+s[1]:
             self.hovering = True
             return True
     def draw(self,surf):
@@ -163,7 +164,7 @@ class realchar(thing):
                 self.hit_region.draw(surf)
         if self.hovering:
             text = ""
-            for s in self.stats:
+            for s in sorted(self.stats):
                 if s in ["type"]:
                     continue
                 cur = self.stats[s]
@@ -234,18 +235,6 @@ class weapon(thing):
         """Stats that match player stats are added to that stat"""
         self.stats = {"type":"gun","damage":0,"accuracy":0,"reaction":0,"range":0,"armor":0,"coverage":0}
 
-class gun(weapon):
-    def set_stats(self):
-        self.stats = {"type":"gun","damage":10,"accuracy":-1,"range":200,"armor":0}
-        
-class knife(weapon):
-    def set_stats(self):
-        self.stats = {"type":"knife","damage":3,"accuracy":100,"range":5,"armor":0}
-        
-class bulletvest(weapon):
-    def set_stats(self):
-        self.stats = {"armor":1,"reaction":-0.5,"coverage":0.25}  #Coverage for chest goes up to 0.25
-
 class action_menu(menu):
     """The fighting menu for a person"""
     def __init__(self,character):
@@ -260,15 +249,9 @@ class action_menu(menu):
             self.options.append("target")
             if character.target:
                 self.options.append("aim")
-                if character.weapon.stats["type"] == "gun":
-                    self.options.append("shoot")
-                if character.weapon.stats["type"] == "knife":
-                    if character.spot.near_enemy():
-                        self.options.append("slice")
+                self.options.append("shoot")
         if character.spot.can_move():
             self.options.append("move")
-        self.options.append("inacurate gun")
-        self.options.append("accurate gun")
     def move(self):
         pygame.fight_scene.move_menu(self.character)
     def target(self):
@@ -278,12 +261,6 @@ class action_menu(menu):
     def aim(self):
         self.character.aim()
         pygame.fight_scene.next()
-    def inacurate_gun(self):
-        self.character.weapon = gun({"accuracy":-2})
-        self.character.reset_hit_region()
-    def accurate_gun(self):
-        self.character.weapon = gun({"accuracy":2,"range":10})
-        self.character.reset_hit_region()
 
 class move_menu(thing):
     def __init__(self,char):
@@ -366,7 +343,9 @@ class fight_scene(thing):
         for good in goodies:
             spot = choose_closest_to(good,[x for x in self.spots.values() if not x.contains])
             player = realchar().set_spot(spot)
-            player.weapon = gun(good.weapon)
+            if good.weapon:
+                player.weapon = weapon(good.weapon)
+                player.stats["weapon"] = good.weapon["tag"]
             for p in good.armor:
                 player.armor[p] = weapon(good.armor[p])
             player.sprite.set_facing("n")
@@ -379,9 +358,8 @@ class fight_scene(thing):
             enemy = realchar().set_spot(spot)
             enemy.stats = stats
             enemy.hp = stats["maxhp"]
-            enemy.weapon = gun()
+            enemy.weapon = weapon(pygame.all_items[enemy.stats["weapon"]])
             enemy.enemy = True
-            enemy.stats["accuracy"] = 0
             self.participants.append(enemy)
         
         self.menus = thing()
