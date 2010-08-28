@@ -233,6 +233,9 @@ class player_char(char):
     def __init__(self,*args):
         super(player_char,self).__init__(*args)
         self.inventory = ["bandaid","smg"]
+    def update(self,dt):
+        if self.stats and not hasattr(self,"hp"):
+            self.hp = self.stats["maxhp"]
     def draw(self,surf):
         super(player_char,self).draw(surf)
         pygame.scene.clickable = []

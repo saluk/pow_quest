@@ -354,6 +354,7 @@ class fight_scene(thing):
                 player.stats["weapon"] = good.weapon["tag"]
             for p in good.armor:
                 player.armor[p] = weapon(good.armor[p])
+            player.hp = good.hp
             player.sprite.set_facing("n")
             self.participants = [player]
         
@@ -485,6 +486,7 @@ class fight_scene(thing):
             for e in self.enemies:
                 e.kill = 1
             self.goodies[0].pos = self.participants[0].pos
+            self.goodies[0].hp = self.participants[0].hp
             pygame.scene.children = self.restore_children
             pygame.play_music("chips/YIFFY.IT")
         if not [x for x in self.participants if not x.enemy]:

@@ -116,6 +116,7 @@ bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
 
 man = player_char("army",[160,60])
+man.stats = pygame.all_stats["player"]
 pygame.player = man
 load_scene("start",man)
 scene.sprites.children.append(man)
