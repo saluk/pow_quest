@@ -360,6 +360,8 @@ class item(sprite):
                 self.char.hp = self.char.stats["maxhp"]
             self.char.inventory.remove(d["tag"])
             return "used bandaid"
+        if d["type"]=="grenade" and self.parent.fight_scene:
+            pygame.fight_scene.grenade_menu(self.char,d)
     def pickup(self):
         if not self in pygame.scene.clickable:
             return
@@ -399,12 +401,15 @@ class inventory_menu(thing):
         self.pos = pos
         self.char = char
         self.last_invlist = []
+        self.fight_scene = None
     def update(self,dt):
         if self.char.inventory != self.last_invlist:
             self.children = []
             x,y = self.pos
             for o in self.char.inventory:
-                self.children.append(item(o,[x,y+3],self.char,False,pygame.all_items[o]))
+                i = item(o,[x,y+3],self.char,False,pygame.all_items[o])
+                i.parent = self
+                self.children.append(i)
                 x+=14
             self.last_invlist = self.char.inventory[:]
             

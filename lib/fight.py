@@ -251,7 +251,6 @@ class action_menu(menu):
             if character.target:
                 self.options.append("aim")
                 self.options.append("shoot")
-        self.options.append("grenade")
         self.options.append("use item")
         if character.spot.can_move():
             self.options.append("move")
@@ -261,8 +260,6 @@ class action_menu(menu):
         pygame.fight_scene.target_menu(self.character)
     def shoot(self):
         pygame.fight_scene.shoot_menu(self.character)
-    def grenade(self):
-        pygame.fight_scene.grenade_menu(self.character)
     def use_item(self):
         pygame.fight_scene.inv_ok = True
     def aim(self):
@@ -294,12 +291,14 @@ class move_menu(thing):
                 return True
                 
 class grenade_menu(thing):
-    def __init__(self,char):
+    def __init__(self,char,stats):
         super(grenade_menu,self).__init__()
         self.children = []
         self.char = char
+        self.stats = stats
     def mouse_click(self,pos,mode):
-        pygame.fight_scene.throw_grenade({"range":60,"damage":15},self.char,pos)
+        self.char.inventory.remove(self.stats["tag"])
+        pygame.fight_scene.throw_grenade(self.stats,self.char,pos)
         self.kill = 1
         pygame.fight_scene.next()
         return True
@@ -483,8 +482,8 @@ class fight_scene(thing):
         self.menus.children = [move_menu(char)]
     def target_menu(self,char):
         self.menus.children = [target_menu(char,self.participants)]
-    def grenade_menu(self,char):
-        self.menus.children = [grenade_menu(char)]
+    def grenade_menu(self,char,stats):
+        self.menus.children = [grenade_menu(char,stats)]
     def shoot_menu(self,char):
         self.menus.children = []
         self.shoot(char)
