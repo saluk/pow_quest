@@ -162,6 +162,18 @@ def col(man):
                 if s.data["destination"]["scene"]:
                     load_scene(s.data["destination"]["scene"],man)
                     man.pos = s.data["destination"]["pos"][:]
+                    closest_door = None
+                    closest_d = 10000
+                    for door in pygame.scene.sprites.children:
+                        if hasattr(door,"data") and door.data.get("destination",None):
+                            d = (man.pos[0]-door.pos[0])**2+(man.pos[1]-door.pos[1])**2
+                            if d<closest_d:
+                                closest_door = door
+                                closest_d = d
+                    if closest_door:
+                        print closest_door.data["destination"]
+                        closest_door.state = "open"
+                        closest_door.set_facing()
                 return False
             return True
     bg = pygame.bg.surf
