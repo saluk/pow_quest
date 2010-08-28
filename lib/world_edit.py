@@ -37,7 +37,8 @@ class add_menu(menu):
     def __init__(self,parent):
         super(add_menu,self).__init__([50,0],150)
         self.parent = parent
-        self.options = ["enemy","door"]
+        self.options = ["door"]
+        self.options.extend(pygame.all_stats.keys())
         self.options.extend(self.parent.items.keys())
     def execute(self,option):
         command = option.lines[0]
@@ -146,8 +147,10 @@ class edit(thing):
             self.create_template(o,pos)
         self.load(scene_name)
     def create_template(self,o,pos):
-        if o["type"] == "enemy":
-            ob = game_object("army",pos)
+        if o["type"] in pygame.all_stats:
+            stats = pygame.all_stats[o["type"]]
+            if stats["type"] == "enemy":
+                ob = game_object("army",pos)
         if o["type"] == "door":
             ob = game_door("door1",pos)
         if o["type"] in self.items.keys():
