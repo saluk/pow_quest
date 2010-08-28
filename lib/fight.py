@@ -452,6 +452,7 @@ class fight_scene(thing):
         self.calc_turns()
     def load_spots_from_file(self,file):
         self.spots = {}
+        self.walls = []
         data = eval(open(file).read())
         points,connections = data["points"],data["connections"]
         for p in points:
@@ -460,6 +461,10 @@ class fight_scene(thing):
             a,b = c
             self.spots[tuple(a)].next.append(self.spots[tuple(b)])
             self.spots[tuple(b)].next.append(self.spots[tuple(a)])
+        wp,wc = data["wall_points"],data["wall_connections"]
+        for c in wc:
+            a,b = c
+            self.walls.append([a,b])
     def calc_turns(self):
         self.turn_start = True
         for p in self.participants:
@@ -486,6 +491,18 @@ class fight_scene(thing):
         self.next()
     def shot_line(self,path,speed,text,after=lambda self:0):
         self.children.append(shot_line(path,speed,self,text,after))
+    def hit_wall(self,line):
+        p = line[0]
+        hit = None
+        hitd = 0
+        for wall in self.walls:
+            hp = geometry.calculateIntersectPoint(line[0],line[1],wall[0],wall[1])
+            if hp:
+                d = (p[0]-hp[0])**2+(p[1]-hp[1])**2
+                if not hit or d<hitd:
+                    hitd = d
+                    hit = hp
+        return hit,hitd
     def shoot(self,char):
         p = char.pos
         obs = self.participants + self.debris
@@ -499,6 +516,7 @@ class fight_scene(thing):
         for shot in range(char.weapon.stats["shots"]):
             target = None
             shoot_path,shoot_angle = char.hit_region.random_line()
+            hit_wall,hitd = self.hit_wall(shoot_path)
             for part in sorted(obs,key=lambda x: x.dist):
                 if part == char:
                     continue
@@ -506,6 +524,9 @@ class fight_scene(thing):
                 if hit_pos:
                     target = part
                     break
+            if hit_wall and (not hit_pos or hitd<(p[0]-hit_pos[0])**2+(p[1]-hit_pos[1])**2):
+                self.shot_line([char.pos,hit_wall],0.5,"Blocked!")
+                continue
             if not target or target.dist>char.hit_region.range**2:
                 self.shot_line(shoot_path,0.5,"Miss")
                 continue
