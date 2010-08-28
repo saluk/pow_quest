@@ -170,7 +170,7 @@ class realchar(thing):
             if not self.enemy or self.hovering:
                 self.hit_region.draw(surf)
         if self.hovering:
-            text = ""
+            text = "hp:%s\n"%self.hp
             for s in sorted(self.stats):
                 if s in ["type"]:
                     continue
@@ -182,11 +182,6 @@ class realchar(thing):
                     text+="%s: %s(%s)\n"%(s,cur,real)
             self.display_stats.lines = []
             self.display_stats.to_print = list(text)
-            if self.display_stats not in self.children:
-                self.children.append(self.display_stats)
-        else:
-            if self.display_stats in self.children:
-                self.children.remove(self.display_stats)
     def set_spot(self,spot):
         if self.spot:
             self.spot.contains = None

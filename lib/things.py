@@ -235,9 +235,27 @@ class player_char(char):
     def __init__(self,*args):
         super(player_char,self).__init__(*args)
         self.inventory = ["bandaid","smg"]
+        self.display_stats = border_textbox("",self.pos)
     def update(self,dt):
         if self.stats and not hasattr(self,"hp"):
             self.hp = self.stats["maxhp"]
+    def mouse_over(self,pos):
+        self.hovering = False
+        cp,s = self.region()
+        if pos[0]>=cp[0] and pos[0]<=cp[0]+s[0] and\
+            pos[1]>=cp[1] and pos[1]<=cp[1]+s[1]:
+            text = "hp:%s\n"%self.hp
+            for s in sorted(self.stats):
+                if s in ["type"]:
+                    continue
+                cur = self.stats[s]
+                text+="%s: %s\n"%(s,cur)
+            self.display_stats.lines = []
+            self.display_stats.to_print = list(text)
+            self.display_stats.update(5)
+            self.display_stats.pos = self.pos
+            pygame.scene.info_window = self.display_stats
+            return True
     def draw(self,surf):
         super(player_char,self).draw(surf)
         pygame.scene.clickable = []
@@ -256,6 +274,7 @@ class player_char(char):
                 pygame.draw.line(surf,[255,250,240],[cp[0]-1,cp[1]+s[1]],[cp[0]+3,cp[1]+s[1]])
                 pygame.draw.line(surf,[255,250,240],[cp[0]+s[0]-3,cp[1]+s[1]],[cp[0]+s[0]+1,cp[1]+s[1]])
                 pygame.scene.clickable.append(ob)
+
         
 class door(sprite):
     def __init__(self,tag,pos,state="closed"):
