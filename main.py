@@ -69,6 +69,8 @@ def load_scene(scene_name,char):
     pygame.scene.children.append(pygame.scene.sprites)
     pygame.scene.sprites.children.append(char)
     
+    pygame.scene.clickable = []
+    
     pygame.scene.enemies = []
     for ob in scene["obs"]:
         if ob.kill:

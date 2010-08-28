@@ -235,6 +235,7 @@ class player_char(char):
         self.inventory = ["bandaid","smg"]
     def draw(self,surf):
         super(player_char,self).draw(surf)
+        pygame.scene.clickable = []
         for ob in pygame.scene.sprites.children:
             if ob == self:
                 continue
@@ -245,6 +246,7 @@ class player_char(char):
             size = max(s)
             if (center[0]-self.pos[0])**2+(center[1]-self.pos[1])**2<self.frob_range**2:
                 pygame.draw.circle(surf,[0,0,0],center,size//2,1)
+                pygame.scene.clickable.append(ob)
         
 class door(sprite):
     def __init__(self,tag,pos,state="closed"):
@@ -256,6 +258,8 @@ class door(sprite):
     def set_facing(self):
         super(door,self).__init__("art/%s_%s.png"%(self.tag,self.state),self.pos)
     def mouse_click(self,pos,mode):
+        if not self in pygame.scene.clickable:
+            return
         c = self
         w,h = self.surf.get_size()
         if pos[0]>=c.pos[0] and pos[0]<=c.pos[0]+w and pos[1]>=c.pos[1] and pos[1]<=c.pos[1]+h:
@@ -273,6 +277,7 @@ class item(sprite):
         self.hover = False
         self.world = world   #In the scene or on the interface
         self.stats = stats
+        self.actions = ["pickup"]
     def mouse_click(self,pos,mode):
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+14 and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+16:
             if not self.world:
@@ -301,6 +306,8 @@ class item(sprite):
             else:
                 self.char.armor[d["position"]] = None
     def pickup(self):
+        if not self in pygame.scene.clickable:
+            return
         if not self.kill:
             self.kill = 1
             pygame.player.inventory.append(self.tag)
