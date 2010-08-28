@@ -346,15 +346,24 @@ class item(sprite):
         if self.world:
             return
         color = [0,0,0]
-        if self.char and self.char.weapon and self.char.weapon["tag"] == self.tag:
+        if self.char and self.char.weapon and self.weapon_stats()["tag"] == self.tag:
             color = [0,0,100]
-        if self.char and "position" in self.stats and self.char.armor[self.stats["position"]] and self.char.armor[self.stats["position"]]["tag"] == self.tag:
+        if self.char and "position" in self.stats and self.char.armor[self.stats["position"]] and self.armor_stats(self.stats["position"])["tag"] == self.tag:
             color = [0,0,100]
         pygame.draw.rect(surf,color,[self.pos,[14,16]])
     def draw_item(self,surf):
         super(item,self).draw(surf)
     def draw(self,surf):
         pass
+    def weapon_stats(self):
+        if hasattr(self.char.weapon,"stats"):
+            return self.char.weapon.stats
+        return self.char.weapon
+    def armor_stats(self,position):
+        ar = self.char.armor[position]
+        if hasattr(ar,"stats"):
+            return ar.stats
+        return ar
             
 class inventory_menu(thing):
     def __init__(self,char,pos):
@@ -370,6 +379,16 @@ class inventory_menu(thing):
                 self.children.append(item(o,[x,y+3],self.char,False,pygame.all_items[o]))
                 x+=14
             self.last_invlist = self.char.inventory[:]
+            
+class fight_inventory_menu(inventory_menu):
+    def __init__(self,char,pos,fight_scene):
+        super(fight_inventory_menu,self).__init__(char,pos)
+        self.fight_scene = fight_scene
+    def mouse_click(self,pos,mode):
+        if self.fight_scene.inv_ok:
+            super(fight_inventory_menu,self).mouse_click(pos,mode)
+            self.fight_scene.next()
+    
         
 class menu(thing):
     def __init__(self,pos,width,options=None):

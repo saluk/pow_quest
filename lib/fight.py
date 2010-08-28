@@ -141,7 +141,7 @@ class realchar(thing):
         self.hp = 30
         self.pos = [0,0]
         self.spot = None
-        self.weapon = weapon({"range":50,"damage":2,"accuracy":4})
+        self.weapon = weapon({"range":50,"damage":2,"accuracy":4,"tag":"hands"})
         self.armor = {"chest":None,"legs":None,"head":None}
         #Chest is up to 0.5 coverage, legs are 0.2 and head is 0.25
         self.sprite = char("army",[100,100])
@@ -182,6 +182,11 @@ class realchar(thing):
                     text+="%s: %s(%s)\n"%(s,cur,real)
             self.display_stats.lines = []
             self.display_stats.to_print = list(text)
+            if self.display_stats not in self.children:
+                self.children.append(self.display_stats)
+        else:
+            if self.display_stats in self.children:
+                self.children.remove(self.display_stats)
     def set_spot(self,spot):
         if self.spot:
             self.spot.contains = None
@@ -416,6 +421,7 @@ class fight_scene(thing):
                 player.armor[p] = weapon(good.armor[p])
             player.hp = good.hp
             player.sprite.set_facing("n")
+            player.inventory = good.inventory
             self.participants = [player]
         
         self.enemies = enemies
@@ -438,6 +444,10 @@ class fight_scene(thing):
             if "crate" in o.img_name:
                 self.debris.append(o)
                 self.children.append(o)
+                
+        self.inv_ok = False
+        self.inv_gui = fight_inventory_menu(self.players()[0],[0,184],self)
+        self.children.append(self.inv_gui)
         
         self.menus = thing()
         self.children.append(self.menus)

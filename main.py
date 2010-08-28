@@ -22,13 +22,13 @@ pygame.timer = pygame.time.Clock()
 class game_scene(thing):
     make_fight = False
     info_window = None
-    def mouse_over(self,pos):
-        if self.info_window in self.children:
-            self.children.remove(self.info_window)
-        self.info_window = None
-        super(game_scene,self).mouse_over(pos)
-        if self.info_window and self.info_window not in self.children:
-            self.children.append(self.info_window)
+    #~ def mouse_over(self,pos):
+        #~ if self.info_window in self.children:
+            #~ self.children.remove(self.info_window)
+        #~ self.info_window = None
+        #~ super(game_scene,self).mouse_over(pos)
+        #~ if self.info_window and self.info_window not in self.children:
+            #~ self.children.append(self.info_window)
     def update(self,dt):
         old_window = self.info_window
         super(game_scene,self).update(dt)
