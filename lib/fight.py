@@ -79,12 +79,18 @@ def line_box(line,box):
     line3 = [x,y+h],[x+w,y+h]
     line4 = [x,y],[x,y+h]
     for bline in [line1,line2,line3,line4]:
-        return geometry.calculateIntersectPoint(line[0],line[1],bline[0],bline[1])
+        hp = geometry.calculateIntersectPoint(line[0],line[1],bline[0],bline[1])
+        if hp:
+            return hp
         
 hr = hit_region()
+hr.start_pos = [155,108]
+hr.target_pos = [126,74]
 hr.update_stats()
-print hr.get_angle()
-print hr.random_line()
+rc = char("army",hr.start_pos)
+ec = char("army",hr.target_pos)
+hit_point = line_box(make_line(hr.start_pos,hr.target_angle,200),ec.region())
+assert hit_point
 
 class spot(thing):
     """A spot someone can be placed in on the fight screen"""
@@ -330,7 +336,6 @@ def choose_closest_to(ob,spots):
 class shot_line(thing):
     def __init__(self,path,speed,parent,popup_text,after):
         super(shot_line,self).__init__()
-        print path
         self.start,self.end = path
         self.dx = int((self.end[0]-self.start[0])/(speed))
         self.dy = int((self.end[1]-self.start[1])/(speed))
@@ -511,6 +516,7 @@ class fight_scene(thing):
                 self.ai(p)
             else:
                 self.action_menu(self.players()[0])
+        self.finish()
     def moving_piece(self,x):
         for p in self.participants:
             if p.target == x:
