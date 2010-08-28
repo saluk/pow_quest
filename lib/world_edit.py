@@ -37,7 +37,7 @@ class add_menu(menu):
     def __init__(self,parent):
         super(add_menu,self).__init__([50,0],150)
         self.parent = parent
-        self.options = ["door","doorbars","crate"]
+        self.options = ["door","doorbars","crate","4waydoor_w","4waydoor_e","4waydoor_s","4waydoor_n"]
         self.options.extend(pygame.all_stats.keys())
         self.options.extend(self.parent.items.keys())
     def execute(self,option):
@@ -163,6 +163,8 @@ class edit(thing):
         if o["type"] in self.items.keys():
             ob = game_item(o["type"],pos,None,True)
             ob.stats = self.items[o["type"]]
+        if o["type"].startswith("4waydoor"):
+            ob = game_door(o["type"],pos)
         if ob:
             ob.parent = self
             ob.data = o

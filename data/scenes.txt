@@ -11,4 +11,8 @@
         "map":"cell",
         "fight":"fight3"
     },
+    "cell_s":{
+        "map":"4way",
+        "fight":"fight4"
+    },
 }

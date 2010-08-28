@@ -132,6 +132,8 @@ for o in eval(open("data/objects.txt").read()):
         ob = item(o["type"],pos,False,True,pygame.all_items[o["type"]])
     if o["type"] == "crate":
         ob = sprite("art/crate.png",pos)
+    if o["type"].startswith("4waydoor"):
+        ob = door(o["type"],pos,"closed")
     if ob:
         ob.data = o
         obs = pygame.scene_data[o["scene"]].get("obs",[])
@@ -145,7 +147,7 @@ man = player_char("army",[129,152])
 man.stats = pygame.all_stats["player"]
 pygame.player = man
 pygame.player.update(1)
-load_scene("cell",man)
+load_scene("cell_s",man)
 scene.sprites.children.append(man)
 
 scene.children.append(entry_box(">",[160,140]))
