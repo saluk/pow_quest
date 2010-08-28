@@ -134,6 +134,10 @@ for o in eval(open("data/objects.txt").read()):
         ob = sprite("art/crate.png",pos)
     if o["type"] == "switch":
         ob = switch("art/redbutton.png",pos)
+        ob.tag = "a"
+    if o["type"] == "switchb":
+        ob = switch("art/switchb.png",pos)
+        ob.tag = "b"
     if o["type"].startswith("4waydoor"):
         ob = door(o["type"],pos,"closed")
     if ob:
@@ -150,7 +154,7 @@ man = player_char("army",[129,152])
 man.stats = pygame.all_stats["player"]
 pygame.player = man
 pygame.player.update(1)
-load_scene("cell_s",man)
+load_scene("cell",man)
 scene.sprites.children.append(man)
 
 bgcolor = (215,196,146)

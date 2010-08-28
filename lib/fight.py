@@ -566,7 +566,9 @@ class fight_scene(thing):
             self.shot_line([char.pos,hit[2]],0.5,"",after)
     def throw_grenade(self,stats,char,pos):
         p = char.pos[:]
-        hr = hit_region(p,pos[:],range=150)
+        e = pos[:]
+        d = math.sqrt((p[0]-e[0])**2+(p[1]-e[1])**2)
+        hr = hit_region(p,e,range=min(d,150))
         hit_thing = self.hit_region_collide(hr,ignore=[char])
         if hit_thing:
             pos = hit_thing[2]
