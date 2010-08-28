@@ -157,6 +157,15 @@ pygame.player.update(1)
 load_scene("cell",man)
 scene.sprites.children.append(man)
 
+scene.children.append(border_textbox("""
+Oh no! The green army has caught you sneaking around their base!
+You'll have to try and escape. Click on nearby objects to interact
+with them. The inventory on the bottom will let you use
+healing and equip or unequip items. If the enemy spots you
+you will have to fight! First, to escape your prison...
+
+You have heard rumors of a hidden switch inside the brick walls.""",[0,100],width=300,timeout=10))
+
 bgcolor = (215,196,146)
 def col(man):
     for s in pygame.scene.sprites.children:

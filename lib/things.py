@@ -223,8 +223,9 @@ class enemy_char(char):
     def can_see(self,ob):
         import fight
         xx = fight.fight_scene(None,[ob],[self],thing(),pygame.cur_scene["fight"],[],False)
-        hit = xx.hit_region_collide(fight.hit_region(self.pos,ob.pos,range=2000),ignore=[self])
+        hit = xx.hit_region_collide(fight.hit_region(self.pos,ob.pos,range=2000),ignore=[x for x in xx.participants if getattr(x,"enemy",False)])
         if hit and hit[0]=="part":
+            print hit[1]
             rise = self.pos[0]-ob.pos[0]
             run = self.pos[1]-ob.pos[1]
             ang = math.atan2(run,rise)*180.0/math.pi
@@ -244,7 +245,9 @@ class enemy_char(char):
         self.next_choice -= dt
         if self.next_choice<0:
             if random.randint(0,10)>5:
-                self.set_facing(random.choice("nesw"))
+                c = list("nesw")
+                c.remove(self.facing)
+                self.set_facing(random.choice(c))
             else:
                 self.walking = random.randint(0,2)
             self.next_choice = random.randint(3,6)
@@ -256,7 +259,7 @@ class player_char(char):
     frob_range = 15
     def __init__(self,*args):
         super(player_char,self).__init__(*args)
-        self.inventory = ["bandaid","smg","grenade","grenade","grenade","grenade","smokegrenade"]
+        self.inventory = []
         self.display_stats = border_textbox("",self.pos)
     def levelup(self,xp):
         levels = []

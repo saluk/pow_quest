@@ -3,7 +3,7 @@
     "diamondarmor": {"type":"armor", "armor":4, "coverage": 0.4, "position":"chest", "reaction":-1},
     "shincaps": {"type":"armor","armor":1,"coverage":0.1,"position":"legs"},
     "cap": {"type":"armor", "armor":1, "coverage":0.24, "position":"head"},
-    "reinforcedcap": {"type":"armor", "armor":3, "coverage":0.24, "position":"head", "reaction":-2},
+    "reinforcedcap": {"type":"armor", "armor":3, "coverage":0.25, "position":"head", "reaction":-2},
     "bandaid": {"type":"restore", "amount":10},
     "pistol": {"type":"weapon", "range":120, "damage":8, "shots":1, "accuracy":1},
     "smg": {"type":"weapon", "range":100, "damage":5, "shots":2, "accuracy":-2},
