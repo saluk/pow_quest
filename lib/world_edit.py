@@ -174,8 +174,8 @@ class edit(thing):
         for o in self.obdat:
             if o.data["scene"] == self.scene_name:
                 self.objects.children.append(o)
-        points,connections = open("data/"+self.scene_data["fight"]+".txt")
-        self.points,self.connections = [eval(points),eval(connections)]
+        data = eval(open("data/"+self.scene_data["fight"]+".txt").read())
+        self.points,self.connections = data["points"],data["connections"]
     def save(self):
         objects = repr([x.data for x in self.obdat])
         f = open("data/objects.txt","w")

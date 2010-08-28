@@ -452,9 +452,8 @@ class fight_scene(thing):
         self.calc_turns()
     def load_spots_from_file(self,file):
         self.spots = {}
-        points,connections = open(file).read().split("\n")
-        points = eval(points)
-        connections = eval(connections)
+        data = eval(open(file).read())
+        points,connections = data["points"],data["connections"]
         for p in points:
             self.spots[tuple(p)] = spot(list(p))
         for c in connections:

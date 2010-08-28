@@ -51,7 +51,7 @@ def debug_menu():
         scene.children.append(popup_text("Some popup text",[150,30]))
     def edit_fight():
         import lib.fight_edit
-        scene.children = [lib.fight_edit.edit(scene.children)]
+        scene.children = [lib.fight_edit.edit(scene.children,pygame.cur_scene_name)]
     def edit_world():
         import lib.world_edit
         scene.children = [lib.world_edit.edit(scene.children,pygame.cur_scene_name)]
