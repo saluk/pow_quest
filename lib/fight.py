@@ -79,8 +79,7 @@ def line_box(line,box):
     line3 = [x,y+h],[x+w,y+h]
     line4 = [x,y],[x,y+h]
     for bline in [line1,line2,line3,line4]:
-        if geometry.calculateIntersectPoint(line[0],line[1],bline[0],bline[1]):
-            return True
+        return geometry.calculateIntersectPoint(line[0],line[1],bline[0],bline[1])
         
 hr = hit_region()
 hr.update_stats()
@@ -325,10 +324,34 @@ def choose_closest_to(ob,spots):
             cd = d
             closest = s
     return closest
+    
+class shot_line(thing):
+    def __init__(self,path,speed,parent,popup_text,after):
+        super(shot_line,self).__init__()
+        self.start,self.end = path
+        self.dx = int((self.end[0]-self.start[0])/(speed))
+        self.dy = int((self.end[1]-self.start[1])/(speed))
+        self.pen = self.start[:]
+        self.speed = speed
+        self.block = True
+        self.parent = parent
+        self.popup_text = popup_text
+        self.after = after
+    def update(self,dt):
+        self.pen[0]+=self.dx*dt
+        self.pen[1]+=self.dy*dt
+        self.speed -= dt
+        if self.speed<=0:
+            self.kill = 1
+            self.after(self)
+            pt = popup_text(self.popup_text,self.pen)
+            self.parent.children.append(pt)
+            pt.block = True
+    def draw(self,surf):
+        pygame.draw.line(surf,[255,0,0],self.start,self.pen)
         
 class fight_scene(thing):
     def __init__(self,restore_children,goodies,enemies,bg,fight,objects):
-        self._debug_line = None
         
         super(fight_scene,self).__init__()
         pygame.fight_scene = self
@@ -382,9 +405,6 @@ class fight_scene(thing):
         self.turns = []
         pygame.play_music("chips/rontomo.s3m")
         self.calc_turns()
-    def draw(self,surf):
-        if self._debug_line:
-            pygame.draw.line(surf,[255,0,0],*self._debug_line)
     def load_spots_from_file(self,file):
         self.spots = {}
         points,connections = open(file).read().split("\n")
@@ -418,6 +438,8 @@ class fight_scene(thing):
         self.menus.children = []
         self.shoot(char)
         self.next()
+    def shot_line(self,path,speed,text,after=lambda self:0):
+        self.children.append(shot_line(path,speed,self,text,after))
     def shoot(self,char):
         p = char.pos
         obs = self.participants + self.debris
@@ -429,13 +451,10 @@ class fight_scene(thing):
         #Iterate through participants in order of distance until we hit it
         target = None
         tp = char.target.pos
-        i = 0
-        hits = 0
-        kills = 0
-        player_hits = 0
         for shot in range(char.weapon.stats["shots"]):
+            i = 0
+            hitpos = None
             shoot_path,shoot_angle = char.hit_region.random_line()
-            self._debug_line = shoot_path
             for part in sorted(obs,key=lambda x: x.dist):
                 if part == char:
                     continue
@@ -443,11 +462,12 @@ class fight_scene(thing):
                 w,h = [10,10]
                 x = part.pos[0]-w//2
                 y = part.pos[1]-h//2
-                if line_box(shoot_path,[[x,y],[w,h]]):
+                hit_pos = line_box(shoot_path,[[x,y],[w,h]])
+                if hit_pos:
                     target = part
                     break
             if not target or target.dist>char.hit_region.range**2:
-                self.children.append(popup_text("Miss",tp[:]))
+                self.shot_line(shoot_path,0.5,"Miss")
                 continue
             angle = hit_region(char.pos,target.pos).target_angle
             diff = angle-shoot_angle
@@ -458,23 +478,24 @@ class fight_scene(thing):
                 damage*=0.5
             tp = target.pos
             if not hasattr(target,"hp"):
-                self.children.append(popup_text("Blocked!",tp[:]))
+                self.shot_line([char.pos,hit_pos],0.5,"Blocked!")
                 continue
-            damage = target.damage(damage)
-            if damage and target in self.players():
-                player_hits += 1
-            self.children.append(popup_text(str(damage),tp[:]))
-            if target.hp<=0:
-                target.set_spot(None)
-                if target in self.participants:
-                    self.participants.remove(target)
-                for p in self.participants:
-                    if p.target == target:
-                        p.target = None
-                kills += 1
-        return hits,player_hits,kills
+            def after(sl,damage=damage,target=target,self=self):
+                damage = target.damage(damage)
+                sl.popup_text = str(damage)
+                if target.hp<=0:
+                    target.set_spot(None)
+                    if target in self.participants:
+                        self.participants.remove(target)
+                    for p in self.participants:
+                        if p.target == target:
+                            p.target = None
+            self.shot_line([char.pos,hit_pos],0.5,"",after)
     def update(self,dt):
         "Update timers if no interface is up"
+        super(fight_scene,self).update(dt)
+        if [x for x in self.children if getattr(x,"block",False)]:
+            return
         nt = self.turns[0]
         if hasattr(nt,"startswith") and nt.startswith("wait"):
             self.turn_start = False
@@ -531,13 +552,4 @@ class fight_scene(thing):
                 result = self.shoot(char)
         else:
             result = self.shoot(char)
-        if result[2]: #Someone killed
-            self.turns.insert(1,"wait:2")
-        elif result[0]: #Someone hit
-            self.turns.insert(1,"wait:0.5")
-        elif result[1]: #Player hit
-            self.turns.insert(1,"wait:1")
-        else:
-            self.turns.insert(1,"wait:0.01")
-
         self.next()
