@@ -422,6 +422,8 @@ class fight_scene(thing):
                 return
             spot = choose_closest_to(good,[x for x in self.spots.values() if not x.contains])
             player = realchar("b")
+            if hasattr(good,"stats"):
+                player.stats = good.stats
             player.fight_scene = self
             player.set_spot(spot)
             if good.weapon:
