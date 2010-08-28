@@ -32,24 +32,23 @@ class hit_region(thing):
         self.start_pos = start
         self.target_pos = end
         self.target_angle = 60
+        self.angle = self.target_angle
         self.range = range
         self.half_width = band//2  #half the angle width
         self.min_half_width = 5
         self.shrink_rate = 5
         self.update_stats()
-    def get_angle(self):
+    def random_angle(self):
         """Pick a random firing angle based on our width. Distribution should be somewhat normal,
         center angle should be more common than edges."""
         mean = self.target_angle
         std_dev = self.half_width/3.0
         ang = random.gauss(mean,std_dev)
-        return ang
-    def random_line(self):
+        self.angle = ang
+    def to_line(self):
         """Pick a random firing angle based on our width. Distribution should be somewhat normal,
         center angle should be more common than edges."""
-        ang = self.get_angle()
-        length = self.range
-        return make_line(self.start_pos,ang,length),ang
+        return make_line(self.start_pos,self.angle,self.range)
     def update_stats(self):
         rise = self.target_pos[0]-self.start_pos[0]
         run = self.target_pos[1]-self.start_pos[1]
@@ -57,6 +56,7 @@ class hit_region(thing):
         self.target_angle = ang*180.0/math.pi
         while self.target_angle<0:
             self.target_angle += 360
+        self.angle = self.target_angle
     def shrink(self):
         self.half_width -= self.shrink_rate
         if self.half_width < self.min_half_width:
@@ -78,19 +78,26 @@ def line_box(line,box):
     line2 = [x+w,y],[x+w,y+h]
     line3 = [x,y+h],[x+w,y+h]
     line4 = [x,y],[x,y+h]
+    hits = []
     for bline in [line1,line2,line3,line4]:
         hp = geometry.calculateIntersectPoint(line[0],line[1],bline[0],bline[1])
         if hp:
-            return hp
+            hits.append(hp)
+    return hits
         
-hr = hit_region()
+hr = hit_region(range=200)
 hr.start_pos = [155,108]
 hr.target_pos = [126,74]
 hr.update_stats()
 rc = char("army",hr.start_pos)
 ec = char("army",hr.target_pos)
-hit_point = line_box(make_line(hr.start_pos,hr.target_angle,200),ec.region())
-assert hit_point
+hit_points = line_box(hr.to_line(),ec.region())
+hr = hit_region(range=200)
+assert hit_points
+hr = hit_region([155, 108],[185.77732664830461, 56.495086017122986],range=1000)
+line = hr.to_line()
+assert geometry.calculateIntersectPoint(line[0],line[1],[86, 31], [302, 57])
+assert not geometry.calculateIntersectPoint([155, 108], [158, 48],[86, 31], [302, 57])
 
 class spot(thing):
     """A spot someone can be placed in on the fight screen"""
@@ -296,6 +303,11 @@ class grenade_menu(thing):
         self.children = []
         self.char = char
         self.stats = stats
+        self.drawpos = [0,0]
+    def draw(self,surf):
+        pygame.draw.circle(surf,[255,50,50],self.drawpos,self.stats["range"],1)
+    def mouse_over(self,pos):
+        self.drawpos = pos
     def mouse_click(self,pos,mode):
         self.char.inventory.remove(self.stats["tag"])
         pygame.fight_scene.throw_grenade(self.stats,self.char,pos)
@@ -448,6 +460,7 @@ class fight_scene(thing):
         pygame.play_music("chips/rontomo.s3m")
         self.finished = False
         self.calc_turns()
+        self.collide_points = []
     def load_spots_from_file(self,file):
         self.spots = {}
         self.walls = []
@@ -485,6 +498,7 @@ class fight_scene(thing):
     def grenade_menu(self,char,stats):
         self.menus.children = [grenade_menu(char,stats)]
     def shoot_menu(self,char):
+        self.collide_points = []
         self.menus.children = []
         self.shoot(char)
         self.next()
@@ -504,31 +518,21 @@ class fight_scene(thing):
         return hit,hitd
     def shoot(self,char):
         p = char.pos
-        obs = self.participants + self.debris
-        #Sort participants by range
-        for part in obs:
-            tp = part.pos
-            d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
-            part.dist = d
-        #Iterate through participants in order of distance until we hit it
         tp = char.target.pos
+        char.hit_region.update_stats()
+        shoot_angle = char.hit_region.target_angle
         for shot in range(char.weapon.get("shots",1)):
             target = None
-            shoot_path,shoot_angle = char.hit_region.random_line()
-            hit_wall,hitd = self.hit_wall(shoot_path)
-            for part in sorted(obs,key=lambda x: x.dist):
-                if part == char:
-                    continue
-                hit_pos = line_box(shoot_path,part.region())
-                if hit_pos:
-                    target = part
-                    break
-            if hit_wall and (not hit_pos or hitd<(p[0]-hit_pos[0])**2+(p[1]-hit_pos[1])**2):
-                self.shot_line([char.pos,hit_wall],0.5,"Blocked!")
-                continue
-            if not target or target.dist>char.hit_region.range**2:
+            char.hit_region.random_angle()
+            hit = self.hit_region_collide(char.hit_region,ignore=[char])
+            shoot_path = char.hit_region.to_line()
+            if not hit:
                 self.shot_line(shoot_path,0.5,"Miss")
                 continue
+            if hit and hit[0] in ["debris","wall"]:
+                self.shot_line([char.pos,hit[2]],0.5,"Blocked!")
+                continue
+            target = hit[1]
             angle = hit_region(char.pos,target.pos).target_angle
             diff = angle-shoot_angle
             if angle<shoot_angle:
@@ -537,9 +541,6 @@ class fight_scene(thing):
             if diff>3:
                 damage*=0.5
             tp = target.pos
-            if not hasattr(target,"hp"):
-                self.shot_line([char.pos,hit_pos],0.5,"Blocked!")
-                continue
             def after(sl,damage=damage,target=target,self=self):
                 damage = target.damage(damage)
                 sl.popup_text = str(damage)
@@ -552,67 +553,70 @@ class fight_scene(thing):
                             p.target = None
                     while target in self.turns:
                         self.turns.remove(target)
-            self.shot_line([char.pos,hit_pos],0.5,"",after)
+            self.shot_line([char.pos,hit[2]],0.5,"",after)
     def throw_grenade(self,stats,char,pos):
         p = char.pos[:]
-        hr = hit_region(p,pos[:])
-        hr.update_stats()
-        shoot_angle = hr.target_angle
-        shoot_path = make_line(p,shoot_angle,stats["range"])
-        obs = self.participants + self.debris
-        #Sort participants by range
-        for part in obs:
-            tp = part.pos
-            d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
-            part.dist = d
-        #Iterate through participants, see if we hit them, grenade lands there if so
-        hit_wall,hitd = self.hit_wall(shoot_path)
-        hit_pos = None
-        for part in sorted(obs,key=lambda x: x.dist):
-            if part == char:
-                continue
-            hit_pos = line_box(shoot_path,part.region())
-            if hit_pos:
-                break
-        if hit_wall and (not hit_pos or hitd<(p[0]-hit_pos[0])**2+(p[1]-hit_pos[1])**2):
-            pos = hit_wall
-        elif hit_pos:
-            pos = hit[0]
+        hr = hit_region(p,pos[:],range=150)
+        hit_thing = self.hit_region_collide(hr,ignore=[char])
+        if hit_thing:
+            pos = hit_thing[2]
         def gg(sl,scene=self,stats=stats,pos=pos):
             scene.grenade(stats,pos)
         self.shot_line([p,pos],1,"boom!",gg)
+    def hit_region_collide(self,hr,participants=True,walls=True,debris=True,ignore=[]):
+        shoot_angle = hr.angle
+        shoot_path = hr.to_line()
+        hits = []
+        if participants:
+            for part in self.participants:
+                if part in ignore:
+                    continue
+                hit_points = line_box(shoot_path,part.region())
+                for hp in hit_points:
+                    hits.append(("part",part,hp))
+        if debris:
+            for part in self.debris:
+                if part in ignore:
+                    continue
+                hit_points = line_box(shoot_path,part.region())
+                for hp in hit_points:
+                    hits.append(("debris",part,hp))
+        if walls:
+            hit_wall,hitd = self.hit_wall(shoot_path)
+            if hit_wall:
+                hits.append(("wall",None,hit_wall))
+        shortest = None
+        p = hr.start_pos[:]
+        for hit in hits:
+            self.collide_points.append(("miss",hit[2]))
+            hit_pos = hit[2]
+            if not shortest or ((p[0]-hit_pos[0])**2+(p[1]-hit_pos[1])**2)<((p[0]-shortest[2][0])**2+(p[1]-shortest[2][1])**2):
+                shortest = list(hit)
+        if shortest:
+            r = math.sqrt((p[0]-shortest[2][0])**2+(p[1]-shortest[2][1])**2)
+            v = hit_region(p,shortest[2],range=r-2)
+            line = v.to_line()
+            shortest[2] = line[1]
+            self.collide_points.append(("hit",shortest[2]))
+        self.collide_points.append(("hit",hr.start_pos))
+        return shortest
     def grenade(self,stats,pos):
         p = pos
-        obs = self.participants + self.debris
-        #Sort participants by range
-        for part in obs:
-            tp = part.pos
-            d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
-            part.dist = d
-        #Iterate through participants, see if we hit them
         hit = []
         for aim_for in self.participants:
             target = None
-            hr = hit_region(p,aim_for.pos)
-            shoot_angle = hr.target_angle
-            shoot_path = make_line(p,shoot_angle,stats["range"])
-            hit_wall,hitd = self.hit_wall(shoot_path)
-            for part in sorted(obs,key=lambda x: x.dist):
-                if part == char:
-                    continue
-                hit_pos = line_box(shoot_path,part.region())
-                if hit_pos:
-                    if not hit_wall or (hitd>(p[0]-hit_pos[0])**2+(p[1]-hit_pos[1])**2):
-                        if part not in hit:
-                            hit.append(part)
-                    break
+            hr = hit_region(p,aim_for.pos,range=stats["range"])
+            h = self.hit_region_collide(hr)
+            if h:
+                hit.append(h)
         if not hit:
             self.shot_line(shoot_path,0.5,"Miss")
             return
-        for target in hit:
-            tp = target.pos
+        for h in hit:
+            target = h[1]
+            tp = h[2]
             angle = hit_region(p,tp).target_angle
-            if not hasattr(target,"hp"):
+            if h[0] in ["debris",'wall']:
                 self.shot_line([p,tp],0.5,"Blocked!")
                 continue
             damage = stats["damage"]
@@ -655,6 +659,14 @@ class fight_scene(thing):
                 self.ai(p)
             else:
                 self.action_menu(self.players()[0])
+    #~ def draw(self,surf):
+        #~ for p in self.participants:
+            #~ pygame.draw.rect(surf,[100,100,100],p.region())
+        #~ for p in reversed(sorted(self.collide_points,key=lambda x: x[0])):
+            #~ if p[0]=="miss":
+                #~ pygame.draw.line(surf,[255,0,255],p[1],p[1])
+            #~ else:
+                #~ pygame.draw.line(surf,[255,0,0],p[1],p[1])
     def moving_piece(self,x):
         for p in self.participants:
             if p.target == x:
