@@ -157,6 +157,7 @@ class realchar(thing):
         self.enemy = False
         self.action = None
         self.target = None
+        self.buff = {}
         self.hit_region = hit_region(start=self.pos,end=self.pos,band=30)
         self.hovering = False
         self.display_stats = border_textbox("",self.pos)
@@ -177,7 +178,10 @@ class realchar(thing):
             if not self.enemy or self.hovering:
                 self.hit_region.draw(surf)
         if self.hovering:
-            text = "hp:%s\n"%self.hp
+            text = ""
+            if self.buff:
+                text += "Gassed!\n"
+            text += "hp:%s\n"%self.hp
             for s in sorted(self.stats):
                 if s in ["type"]:
                     continue
@@ -236,6 +240,8 @@ class realchar(thing):
         for a in self.armor.values():
             if a and key in a:
                 s+=a[key]
+        if key in self.buff:
+            s+=self.buff[key]
         return s
     def damage(self,amount):
         if random.random()<self.get_stat("coverage"):
@@ -479,6 +485,10 @@ class fight_scene(thing):
     def calc_turns(self):
         self.turn_start = True
         for p in self.participants:
+            if p.buff:
+                p.buff["turns"] -= 1
+                if p.buff["turns"] <= 0:
+                    p.buff = {}
             self.turns.append(p)
         self.next_mode = 1
     def next(self):
@@ -620,18 +630,22 @@ class fight_scene(thing):
                 self.shot_line([p,tp],0.5,"Blocked!")
                 continue
             damage = stats["damage"]
-            def after(sl,damage=damage,target=target,self=self):
-                damage = target.damage(damage)
-                sl.popup_text = str(damage)
-                if target.hp<=0:
-                    target.set_spot(None)
-                    if target in self.participants:
-                        self.participants.remove(target)
-                    for p in self.participants:
-                        if p.target == target:
-                            p.target = None
-                    while target in self.turns:
-                        self.turns.remove(target)
+            def after(sl,damage=damage,target=target,self=self,stats=stats):
+                if stats["damage"]:
+                    damage = target.damage(damage)
+                    sl.popup_text = str(damage)
+                    if target.hp<=0:
+                        target.set_spot(None)
+                        if target in self.participants:
+                            self.participants.remove(target)
+                        for p in self.participants:
+                            if p.target == target:
+                                p.target = None
+                        while target in self.turns:
+                            self.turns.remove(target)
+                if stats["buff"]:
+                    target.buff = stats["buff"].copy()
+                    sl.popup_text = "Gassed!"
             self.shot_line([p,tp],0.5,"",after)
     def update(self,dt):
         "Update timers if no interface is up"

@@ -235,7 +235,7 @@ class player_char(char):
     frob_range = 15
     def __init__(self,*args):
         super(player_char,self).__init__(*args)
-        self.inventory = ["bandaid","smg","grenade","grenade","grenade","grenade","grenade"]
+        self.inventory = ["bandaid","smg","grenade","grenade","grenade","grenade","smokegrenade"]
         self.display_stats = border_textbox("",self.pos)
     def levelup(self,xp):
         levels = []
