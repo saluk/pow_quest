@@ -235,7 +235,8 @@ class weapon(thing):
             self.stats.update(stats)
     def set_stats(self):
         """Stats that match player stats are added to that stat"""
-        self.stats = {"type":"gun","damage":0,"accuracy":0,"reaction":0,"range":0,"armor":0,"coverage":0}
+        self.stats = {"type":"gun","damage":0,"accuracy":0,"reaction":0,"range":0,
+                        "armor":0,"coverage":0,"shots":1}
 
 class action_menu(menu):
     """The fighting menu for a person"""
@@ -423,39 +424,46 @@ class fight_scene(thing):
         target = None
         tp = char.target.pos
         i = 0
-        shoot_path,shoot_angle = char.hit_region.random_line()
-        self._debug_line = shoot_path
-        for part in sorted(self.participants,key=lambda x: x.dist):
-            if part == char:
+        hits = 0
+        kills = 0
+        player_hits = 0
+        for shot in range(char.weapon.stats["shots"]):
+            shoot_path,shoot_angle = char.hit_region.random_line()
+            self._debug_line = shoot_path
+            for part in sorted(self.participants,key=lambda x: x.dist):
+                if part == char:
+                    continue
+                i+=1
+                w,h = [10,10]
+                x = part.pos[0]-w//2
+                y = part.pos[1]-h//2
+                if line_box(shoot_path,[[x,y],[w,h]]):
+                    target = part
+                    break
+            if not target or target.dist>char.hit_region.range**2:
+                self.children.append(popup_text("Miss",tp[:]))
                 continue
-            i+=1
-            w,h = [10,10]
-            x = part.pos[0]-w//2
-            y = part.pos[1]-h//2
-            if line_box(shoot_path,[[x,y],[w,h]]):
-                target = part
-                break
-        if not target or target.dist>char.hit_region.range**2:
-            self.children.append(popup_text("Miss",tp[:]))
-            return "miss",target
-        angle = hit_region(char.pos,target.pos).target_angle
-        diff = angle-shoot_angle
-        if angle<shoot_angle:
-            diff = shoot_angle-angle
-        damage = char.weapon.stats["damage"]
-        if diff>3:
-            damage*=0.5
-        tp = target.pos
-        damage = target.damage(damage)
-        self.children.append(popup_text(str(damage),tp[:]))
-        if target.hp<=0:
-            target.set_spot(None)
-            self.participants.remove(target)
-            for p in self.participants:
-                if p.target == target:
-                    p.target = None
-            return "kill",target
-        return "damage",target,damage
+            angle = hit_region(char.pos,target.pos).target_angle
+            diff = angle-shoot_angle
+            if angle<shoot_angle:
+                diff = shoot_angle-angle
+            damage = char.weapon.stats["damage"]
+            if diff>3:
+                damage*=0.5
+            tp = target.pos
+            damage = target.damage(damage)
+            if damage and target in self.players():
+                player_hits += 1
+            self.children.append(popup_text(str(damage),tp[:]))
+            if target.hp<=0:
+                target.set_spot(None)
+                if target in self.participants:
+                    self.participants.remove(target)
+                for p in self.participants:
+                    if p.target == target:
+                        p.target = None
+                kills += 1
+        return hits,player_hits,kills
     def update(self,dt):
         "Update timers if no interface is up"
         nt = self.turns[0]
@@ -514,12 +522,13 @@ class fight_scene(thing):
                 result = self.shoot(char)
         else:
             result = self.shoot(char)
-        if result[0] == "kill":
+        if result[2]: #Someone killed
             self.turns.insert(1,"wait:2")
-        elif result[0] == "miss":
-            self.turns.insert(1,"wait:0.01")
-        elif result[0] == "damage":
-            if result[1] in self.players():
-                self.turns.insert(1,"wait:0.5")
+        elif result[0]: #Someone hit
             self.turns.insert(1,"wait:0.5")
+        elif result[1]: #Player hit
+            self.turns.insert(1,"wait:1")
+        else:
+            self.turns.insert(1,"wait:0.01")
+
         self.next()
