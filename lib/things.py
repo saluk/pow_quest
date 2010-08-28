@@ -245,7 +245,11 @@ class player_char(char):
             center = cp[0]+s[0]//2,cp[1]+s[1]//2
             size = max(s)
             if (center[0]-self.pos[0])**2+(center[1]-self.pos[1])**2<self.frob_range**2:
-                pygame.draw.circle(surf,[0,0,0],center,size//2,1)
+                #pygame.draw.circle(surf,[0,0,0],center,size//2,1)
+                pygame.draw.line(surf,[255,250,240],[cp[0]-1,cp[1]-1],[cp[0]+3,cp[1]-1])
+                pygame.draw.line(surf,[255,250,240],[cp[0]+s[0]-3,cp[1]-1],[cp[0]+s[0]+1,cp[1]-1])
+                pygame.draw.line(surf,[255,250,240],[cp[0]-1,cp[1]+s[1]],[cp[0]+3,cp[1]+s[1]])
+                pygame.draw.line(surf,[255,250,240],[cp[0]+s[0]-3,cp[1]+s[1]],[cp[0]+s[0]+1,cp[1]+s[1]])
                 pygame.scene.clickable.append(ob)
         
 class door(sprite):
