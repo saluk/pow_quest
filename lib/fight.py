@@ -133,7 +133,7 @@ class spot(thing):
             self.children = []
                 
 class realchar(thing):
-    def __init__(self):
+    def __init__(self,tag):
         """Stats info:
         maxhp - maximum hit points
         accuracy - starting band and minimum band
@@ -151,7 +151,7 @@ class realchar(thing):
         self.weapon = {"range":50,"damage":2,"accuracy":4,"tag":"hands"}
         self.armor = {"chest":None,"legs":None,"head":None}
         #Chest is up to 0.5 coverage, legs are 0.2 and head is 0.25
-        self.sprite = char("army",[100,100])
+        self.sprite = char(tag,[100,100])
         self.health_bar = quick_textbox("",[100,100])
         self.children = []
         self.enemy = False
@@ -421,7 +421,7 @@ class fight_scene(thing):
             if good.kill:
                 return
             spot = choose_closest_to(good,[x for x in self.spots.values() if not x.contains])
-            player = realchar()
+            player = realchar("b")
             player.fight_scene = self
             player.set_spot(spot)
             if good.weapon:
@@ -440,7 +440,7 @@ class fight_scene(thing):
                 return
             spot = choose_closest_to(enemy,[x for x in self.spots.values() if not x.contains])
             stats = enemy.stats
-            enemy = realchar()
+            enemy = realchar("army")
             enemy.fight_scene = self
             enemy.set_spot(spot)
             enemy.stats = stats

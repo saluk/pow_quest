@@ -61,7 +61,7 @@ class add_menu(menu):
     def __init__(self,parent):
         super(add_menu,self).__init__([50,0],150)
         self.parent = parent
-        self.options = ["door","doorbars","crate","4waydoor_w","4waydoor_e","4waydoor_s","4waydoor_n","switch","switchb"]
+        self.options = ["crate"]
         self.options.extend(pygame.all_stats.keys())
         self.options.extend(self.parent.items.keys())
     def execute(self,option):

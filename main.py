@@ -150,7 +150,7 @@ for o in eval(open("data/objects.txt").read()):
 bunker = sprite("art/t-junction.png",[0,0])
 scene.children.append(bunker)
 
-man = player_char("army",[129,152])
+man = player_char("b",[129,152])
 man.stats = pygame.all_stats["player"]
 pygame.player = man
 pygame.player.update(1)
