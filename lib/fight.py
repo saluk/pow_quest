@@ -490,6 +490,8 @@ class fight_scene(thing):
                     for p in self.participants:
                         if p.target == target:
                             p.target = None
+                    while target in self.turns:
+                        self.turns.remove(target)
             self.shot_line([char.pos,hit_pos],0.5,"",after)
     def update(self,dt):
         "Update timers if no interface is up"
