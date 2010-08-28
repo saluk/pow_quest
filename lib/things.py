@@ -228,7 +228,8 @@ class enemy_char(char):
             return
         if self.can_see(pygame.player):
             pygame.scene.make_fight = True
-        
+
+level_defs = [(10,{"reaction":1}),(20,{"accuracy":1,"armor":1}),(32,{"maxhp":10,"accuracy":1,"armor":1}),(53,{"reaction":2,"armor":1,"accuracy":1}),(97,{"accuracy":2,"reaction":2}),(125,{"armor":1,"maxhp":10})]
         
 class player_char(char):
     frob_range = 15
@@ -236,6 +237,22 @@ class player_char(char):
         super(player_char,self).__init__(*args)
         self.inventory = ["bandaid","smg"]
         self.display_stats = border_textbox("",self.pos)
+    def levelup(self,xp):
+        levels = []
+        self.stats["xp"] += xp
+        while 1:
+            if self.stats["xp"]<level_defs[0][0]:
+                break
+            next = level_defs.pop(0)
+            next = next[1]
+            updates = []
+            for s in next:
+                old = self.stats[s]
+                oldp = old+next[s]
+                updates.append((s,old,oldp))
+                self.stats[s] = oldp
+            levels.append(updates)
+        return levels
     def update(self,dt):
         if self.stats and not hasattr(self,"hp"):
             self.hp = self.stats["maxhp"]

@@ -655,6 +655,11 @@ class fight_scene(thing):
             text = "You have killed the opposition... For now.\n"
             xp = sum([x.stats["xp"] for x in self.enemies])
             text += "You have earned %s xp.\n"%xp
+            levels = player.levelup(xp)
+            for l in levels:
+                text += "You have gained a level!\n"
+                for c in l:
+                    text += "%s: %s -> %s\n"%(c)
             for e in self.enemies:
                 if random.randint(0,10)>8:
                     item = random.choice(["bandaid"]*3 + ["bulletvest"]*1)
