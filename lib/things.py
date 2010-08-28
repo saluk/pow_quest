@@ -177,6 +177,7 @@ class sprite(thing):
         if img not in self.images:
             self.images[img] = pygame.image.load(img).convert()
             self.images[img].set_colorkey([255,0,255])
+        self.img_name = img
         self.surf = self.images[img]
     def draw(self,surf):
         cp = self.pos[:]

@@ -398,8 +398,9 @@ class fight_scene(thing):
         
         self.debris = []
         for o in objects:
-            self.debris.append(o)
-            self.children.append(o)
+            if "crate" in o.img_name:
+                self.debris.append(o)
+                self.children.append(o)
         
         self.menus = thing()
         self.children.append(self.menus)
