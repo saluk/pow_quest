@@ -55,6 +55,18 @@
         "map":"4way",
         "fight":"fight4"
     },
+    "recroom":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "switch":{
+        "map":"4way",
+        "fight":"fight4"
+    },
+    "storage":{
+        "map":"4way",
+        "fight":"fight4"
+    },
     "kitchen":{
         "map":"kitchen",
         "fight":"fight5"
