@@ -299,7 +299,7 @@ class grenade_menu(thing):
         self.children = []
         self.char = char
     def mouse_click(self,pos,mode):
-        pygame.fight_scene.grenade({"range":60,"damage":15},pos)
+        pygame.fight_scene.throw_grenade({"range":60,"damage":15},self.char,pos)
         self.kill = 1
         pygame.fight_scene.next()
         return True
@@ -554,10 +554,34 @@ class fight_scene(thing):
                     while target in self.turns:
                         self.turns.remove(target)
             self.shot_line([char.pos,hit_pos],0.5,"",after)
-    #~ def throw_grenade(self,stats,char,pos):
-        #~ hr = hit_region(char.pos,pos)
-        #~ shoot_angle = hr.target_angle
-        #~ shoot_path = make_line(p,shoot_angle,stats["range"])
+    def throw_grenade(self,stats,char,pos):
+        p = char.pos[:]
+        hr = hit_region(p,pos[:])
+        hr.update_stats()
+        shoot_angle = hr.target_angle
+        shoot_path = make_line(p,shoot_angle,stats["range"])
+        obs = self.participants + self.debris
+        #Sort participants by range
+        for part in obs:
+            tp = part.pos
+            d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
+            part.dist = d
+        #Iterate through participants, see if we hit them, grenade lands there if so
+        hit_wall,hitd = self.hit_wall(shoot_path)
+        hit_pos = None
+        for part in sorted(obs,key=lambda x: x.dist):
+            if part == char:
+                continue
+            hit_pos = line_box(shoot_path,part.region())
+            if hit_pos:
+                break
+        if hit_wall and (not hit_pos or hitd<(p[0]-hit_pos[0])**2+(p[1]-hit_pos[1])**2):
+            pos = hit_wall
+        elif hit_pos:
+            pos = hit[0]
+        def gg(sl,scene=self,stats=stats,pos=pos):
+            scene.grenade(stats,pos)
+        self.shot_line([p,pos],1,"boom!",gg)
     def grenade(self,stats,pos):
         p = pos
         obs = self.participants + self.debris
