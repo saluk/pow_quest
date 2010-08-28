@@ -719,7 +719,7 @@ class fight_scene(thing):
                     text += "%s: %s -> %s\n"%(c)
             for e in self.enemies:
                 if random.randint(0,10)>8:
-                    item = random.choice(["bandaid"]*3 + ["bulletvest"]*1)
+                    item = random.choice(["bandaid"]*5 + ["bulletvest"]*1 + ["grenade"]*1 + ["smokegrenade"]*1)
                     text += "You also found an %s!\n"%item
                     player.inventory.append(item)
             self.children = [ending(text,after)]

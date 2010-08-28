@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 
 class thing(object):
     kill = 0
@@ -213,6 +214,8 @@ class char(sprite):
         self.center = True
         
 class enemy_char(char):
+    next_choice = 0
+    walking = 0
     def perception(self,obs):
         for o in obs:
             if self.can_see(o):
@@ -238,6 +241,14 @@ class enemy_char(char):
             return
         if self.can_see(pygame.player):
             pygame.scene.make_fight = True
+        self.next_choice -= dt
+        if self.next_choice<0:
+            if random.randint(0,10)>5:
+                self.set_facing(random.choice("nesw"))
+            else:
+                self.walking = random.randint(0,2)
+            self.next_choice = random.randint(3,6)
+            
 
 level_defs = [(10,{"reaction":1}),(20,{"accuracy":1,"armor":1}),(32,{"maxhp":10,"accuracy":1,"armor":1}),(53,{"reaction":2,"armor":1,"accuracy":1}),(97,{"accuracy":2,"reaction":2}),(125,{"armor":1,"maxhp":10})]
         
