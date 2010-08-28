@@ -54,7 +54,6 @@ class textbox(thing):
         if not self.to_print:
             if self.timeout != None:
                 self.timeout -= dt
-                print self.timeout
                 if self.timeout<=0:
                     self.kill = 1
             return
@@ -340,7 +339,6 @@ class switch(sprite):
         w,h = self.surf.get_size()
         if pos[0]>=c.pos[0] and pos[0]<=c.pos[0]+w and pos[1]>=c.pos[1] and pos[1]<=c.pos[1]+h:
             for ob in pygame.all_objects:
-                print ob.data
                 if ob.data.get("switchdoor",None)==self.tag:
                     ob.toggle()
                     pygame.scene.children.append(border_textbox("You hear a click somewhere",[0,0],160,timeout=3))

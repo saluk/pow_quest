@@ -737,9 +737,16 @@ class fight_scene(thing):
             return
         need_near = False
         result = [None]
+        if char.hit_region.half_width>char.hit_region.min_half_width:
+            if random.randint(0,10)>5:
+                char.hit_region.shrink()
+                return self.next()
+        options = char.spot.can_move()
+        if random.randint(0,100)>85:
+            char.set_spot(choose_closest_to(char.target,options))
+            return self.next()
         if need_near:
             if char.target not in char.spot.near():
-                options = char.spot.can_move()
                 if options:
                     char.set_spot(choose_closest_to(char.target,options))
             else:
