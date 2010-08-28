@@ -315,12 +315,12 @@ class target_menu(thing):
         self.children = []
         self.char = char
         self.chars = chars
-    def draw(self,surf):
-        for s in self.chars:
-            x = s.pos[0]-10
-            y = s.pos[1]-10
-            pygame.draw.rect(surf,[255,0,0],[[x,y],[20,20]])
-            pygame.draw.line(surf,[255,255,255],self.char.pos,s.pos)
+    #~ def draw(self,surf):
+        #~ for s in self.chars:
+            #~ x = s.pos[0]-10
+            #~ y = s.pos[1]-10
+            #~ pygame.draw.rect(surf,[255,0,0],[[x,y],[20,20]])
+            #~ pygame.draw.line(surf,[255,255,255],self.char.pos,s.pos)
     def mouse_click(self,pos,mode):
         x,y = pos
         for s in self.chars:
