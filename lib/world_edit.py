@@ -22,6 +22,30 @@ class scene_menu(menu):
         self.parent.load(command)
         self.kill = 1
         
+class destination_menu(menu):
+    def __init__(self):
+        super(destination_menu,self).__init__([50,0],150)
+        self.options = pygame.scene_data.keys()
+    def execute(self,option):
+        command = option.lines[0]
+        self.ob.data["destination"] = {"scene":command,"pos":[0,0]}
+        self.kill = 1
+        sm = destination_point(self.ob)
+        sm.parent = self.parent
+        self.parent.children.append(sm)
+        
+class destination_point(thing):
+    def __init__(self,char):
+        super(destination_point,self).__init__()
+        self.char = char
+    def draw(self,surf):
+        bg = sprite("art/"+pygame.scene_data[self.char.data["destination"]["scene"]]["map"]+".png",[0,0])
+        bg.draw(surf)
+    def mouse_click(self,pos,mode):
+        self.char.data["destination"]["pos"] = pos
+        self.kill = 1
+        return True
+        
 class place_menu(thing):
     def __init__(self,char):
         super(place_menu,self).__init__()
@@ -78,9 +102,15 @@ class edit_menu(menu):
         
 class object_menu(menu):
     def update(self,dt):
-        self.options = ["move","cancel","----","delete"]
+        self.options = ["move","cancel","set destination","----","delete"]
         super(object_menu,self).update(dt)
         setattr(self,"----",lambda: 1)
+    def set_destination(self):
+        sm = destination_menu()
+        sm.parent = self.parent
+        sm.ob = self.char
+        self.kill = 1
+        self.parent.children.append(sm)
     def cancel(self):
         self.kill = 1
     def move(self):
@@ -104,7 +134,7 @@ class move_object(thing):
 class editor_ob:
     def mouse_click(self,pos,mode):
         if pos[0]>=self.pos[0] and pos[0]<=self.pos[0]+self.surf.get_width() and pos[1]>=self.pos[1] and pos[1]<=self.pos[1]+self.surf.get_height():
-            om = object_menu(pos,50)
+            om = object_menu(pos,100)
             om.parent = self.parent
             om.char = self
             self.parent.children.append(om)
@@ -158,13 +188,16 @@ class edit(thing):
             ob = game_sprite("art/crate.png",pos)
         if o["type"] == "door":
             ob = game_door("door1",pos)
+            o["destination"] = {"scene":None,"pos":[0,0]}
         if o["type"] == "doorbars":
             ob = game_door("doorbars",pos)
+            o["destination"] = {"scene":None,"pos":[0,0]}
         if o["type"] in self.items.keys():
             ob = game_item(o["type"],pos,None,True)
             ob.stats = self.items[o["type"]]
         if o["type"].startswith("4waydoor"):
             ob = game_door(o["type"],pos)
+            o["destination"] = {"scene":None,"pos":[0,0]}
         if ob:
             ob.parent = self
             ob.data = o

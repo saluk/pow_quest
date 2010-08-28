@@ -150,9 +150,6 @@ pygame.player.update(1)
 load_scene("cell_s",man)
 scene.sprites.children.append(man)
 
-scene.children.append(entry_box(">",[160,140]))
-
-
 bgcolor = (215,196,146)
 def col(man):
     for s in pygame.scene.sprites.children:
