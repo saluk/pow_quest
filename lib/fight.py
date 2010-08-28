@@ -199,6 +199,8 @@ class realchar(thing):
             if self.display_stats in self.children:
                 self.children.remove(self.display_stats)
     def set_spot(self,spot):
+        if spot.contains:
+            return
         if self.spot:
             self.spot.contains = None
             if self.sprite in self.children:
