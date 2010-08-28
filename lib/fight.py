@@ -328,6 +328,7 @@ def choose_closest_to(ob,spots):
 class shot_line(thing):
     def __init__(self,path,speed,parent,popup_text,after):
         super(shot_line,self).__init__()
+        print path
         self.start,self.end = path
         self.dx = int((self.end[0]-self.start[0])/(speed))
         self.dy = int((self.end[1]-self.start[1])/(speed))
@@ -449,11 +450,10 @@ class fight_scene(thing):
             d = (p[0]-tp[0])**2+(p[1]-tp[1])**2
             part.dist = d
         #Iterate through participants in order of distance until we hit it
-        target = None
         tp = char.target.pos
         for shot in range(char.weapon.stats["shots"]):
             i = 0
-            hitpos = None
+            target = None
             shoot_path,shoot_angle = char.hit_region.random_line()
             for part in sorted(obs,key=lambda x: x.dist):
                 if part == char:
